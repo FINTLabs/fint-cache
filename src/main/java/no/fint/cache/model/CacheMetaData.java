@@ -9,12 +9,12 @@ import java.util.Date;
 @Setter
 public class CacheMetaData {
     private String md5Sum;
-    private Date lastUpdated;
+    private long lastUpdated;
     private int cacheCount;
 
     public CacheMetaData() {
         md5Sum = null;
-        lastUpdated = null;
+        lastUpdated = 0;
         cacheCount = 0;
     }
 }

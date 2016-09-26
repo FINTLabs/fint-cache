@@ -1,0 +1,19 @@
+group 'no.fint'
+version '0.0.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+
+dependencies {
+    compile('org.springframework:spring-core:4.3.3.RELEASE')
+    compile('org.projectlombok:lombok:1.16.6')
+}

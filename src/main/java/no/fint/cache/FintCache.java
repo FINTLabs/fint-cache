@@ -3,7 +3,10 @@ package no.fint.cache;
 import no.fint.cache.model.CacheMetaData;
 import no.fint.cache.model.CacheObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.DigestUtils.md5DigestAsHex;
@@ -27,7 +30,7 @@ public class FintCache implements Cache {
             cacheObjectList.addAll(cacheObjectMap.values());
         } else {
             List<CacheObject> cacheObjectListCopy = new ArrayList<>(cacheObjectList);
-            cacheObjectList.forEach( cacheObject -> {
+            cacheObjectList.forEach(cacheObject -> {
                 String md5sum = cacheObject.getMd5Sum();
                 if (cacheObjectMap.containsKey(md5sum)) {
                     cacheObjectMap.remove(md5sum);
@@ -57,10 +60,33 @@ public class FintCache implements Cache {
         return cacheObjectList;
     }
 
+    public List<Object> getSourceList() {
+        List<Object> list = new ArrayList();
+        cacheObjectList.stream().forEach(cacheObject -> {
+            list.add(cacheObject.getObject());
+        });
+
+        return list;
+
+    }
+
     public List<CacheObject> getSince(long timestamp) {
         return cacheObjectList.stream().filter(cacheObject ->
                 (cacheObject.getLastUpdated() >= timestamp)).collect(Collectors.toList());
     }
+
+    public List<Object> getSourceListSince(long timestamp) {
+        List<Object> list = new ArrayList();
+        cacheObjectList.stream().filter(cacheObject ->
+                (cacheObject.getLastUpdated() >= timestamp))
+                .collect(Collectors.toList())
+                .forEach(cacheObject -> {
+                    list.add(cacheObject.getObject());
+                });
+
+        return list;
+    }
+
 
     private void updateMetaData() {
         cacheMetaData.setCacheCount(cacheObjectList.size());

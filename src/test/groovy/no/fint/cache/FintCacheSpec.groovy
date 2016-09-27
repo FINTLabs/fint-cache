@@ -150,4 +150,47 @@ class FintCacheSpec extends Specification {
         then:
         cachedValues[0].getObject() == values.get(0)
     }
+
+    def "Get source list"() {
+        given:
+        def cacheObj = new CacheObject("test-value")
+        def values = new ArrayList()
+        values.add(cacheObj)
+        defaultCache.update(values)
+
+        when:
+        def sourceList = defaultCache.getSourceList()
+
+        then:
+        sourceList.get(0) == cacheObj
+    }
+
+    def "Get updated source objects since timestamp, new objects"() {
+        given:
+        def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
+        def values = new ArrayList()
+        values.add(cacheObj)
+        defaultCache.update(values)
+
+        when:
+        def updatedSince = defaultCache.getSourceListSince(System.currentTimeMillis() - 15000)
+
+        then:
+        updatedSince.size() == 1
+        updatedSince.get(0) == cacheObj
+    }
+
+    def "Get updated source objects since timestamp, no new objects"() {
+        given:
+        def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
+        def values = new ArrayList()
+        values.add(cacheObj)
+        defaultCache.update(values)
+
+        when:
+        def updatedSince = defaultCache.getSourceListSince(System.currentTimeMillis() + 15000)
+
+        then:
+        updatedSince.size() == 0
+    }
 }

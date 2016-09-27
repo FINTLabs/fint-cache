@@ -3,15 +3,13 @@ package no.fint.cache;
 import no.fint.cache.model.CacheMetaData;
 import no.fint.cache.model.CacheObject;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.DigestUtils.md5DigestAsHex;
 
 public class FintCache implements Cache {
+
     private CacheMetaData cacheMetaData;
     private List<CacheObject> cacheObjectList;
 
@@ -20,7 +18,11 @@ public class FintCache implements Cache {
         cacheObjectList = new ArrayList<>();
     }
 
-    public void update(Map<String, CacheObject> cacheObjectMap) {
+    public void update(List<?> objects) {
+        Map<String, CacheObject> cacheObjectMap;
+
+        cacheObjectMap = getMap(objects);
+
         if (cacheObjectList.isEmpty()) {
             cacheObjectList.addAll(cacheObjectMap.values());
         } else {
@@ -41,9 +43,9 @@ public class FintCache implements Cache {
         updateMetaData();
     }
 
-    public void refresh(Map<String, CacheObject> cacheObjectMap) {
+    public void refresh(List<?> objects) {
         cacheObjectList.clear();
-        update(cacheObjectMap);
+        update(objects);
     }
 
     public void flush() {
@@ -64,6 +66,17 @@ public class FintCache implements Cache {
         cacheMetaData.setCacheCount(cacheObjectList.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         cacheMetaData.setMd5Sum(md5DigestAsHex(cacheObjectList.toString().getBytes()));
+    }
+
+    private Map<String, CacheObject> getMap(List<?> list) {
+        Map<String, CacheObject> cacheObjectMap = new HashMap<>();
+
+        list.stream().forEach(o -> {
+            CacheObject cacheObject = new CacheObject(o);
+            cacheObjectMap.put(cacheObject.getMd5Sum(), cacheObject);
+        });
+
+        return cacheObjectMap;
     }
 
     private void flushMetaData() {

@@ -1,11 +1,8 @@
 package no.fint.cache
 
-import no.fint.cache.model.CacheMetaData
 import no.fint.cache.model.CacheObject
 import no.fint.cache.model.TestUtil
 import spock.lang.Specification
-
-import java.time.LocalDateTime
 
 
 class FintCacheSpec extends Specification {
@@ -17,7 +14,7 @@ class FintCacheSpec extends Specification {
 
     def "Update cache, no existing values"() {
         given:
-        def values = ["123": new CacheObject("test-value")]
+        def values = [new CacheObject("test-value")]
 
         when:
         defaultCache.update(values)
@@ -29,12 +26,12 @@ class FintCacheSpec extends Specification {
     def "Update cache, add new object"() {
         given:
         def cacheObj1 = new CacheObject("test-value1")
-        def values = new HashMap<>()
-        values.put(cacheObj1.getMd5Sum(), cacheObj1)
+        def values = new ArrayList()
+        values.add(cacheObj1);
         defaultCache.update(values)
 
         def cacheObj2 = new CacheObject("test-value2")
-        values.put(cacheObj2.getMd5Sum(), cacheObj2)
+        values.add(cacheObj2)
 
         when:
         defaultCache.update(values)
@@ -48,14 +45,14 @@ class FintCacheSpec extends Specification {
         def cacheObj1 = new CacheObject("test-value1")
         def cacheObj2 = new CacheObject("test-value2")
         def cacheObj3 = new CacheObject("test-value3")
-        def values = new HashMap<>()
-        values.put(cacheObj1.getMd5Sum(), cacheObj1)
-        values.put(cacheObj2.getMd5Sum(), cacheObj2)
-        values.put(cacheObj3.getMd5Sum(), cacheObj3)
+        def values = new ArrayList()
+        values.add(cacheObj1)
+        values.add(cacheObj2)
+        values.add(cacheObj3)
         defaultCache.update(values)
 
         when:
-        values.remove(cacheObj3.getMd5Sum())
+        values.remove(cacheObj3)
         defaultCache.update(values)
 
         then:
@@ -67,16 +64,16 @@ class FintCacheSpec extends Specification {
         def cacheObj1 = new CacheObject("test-value1")
         def cacheObj2 = new CacheObject("test-value2")
         def cacheObj3 = new CacheObject("test-value3")
-        def values = new HashMap<>()
-        values.put(cacheObj1.getMd5Sum(), cacheObj1)
-        values.put(cacheObj2.getMd5Sum(), cacheObj2)
-        values.put(cacheObj3.getMd5Sum(), cacheObj3)
+        def values = new ArrayList()
+        values.add(cacheObj1)
+        values.add(cacheObj2)
+        values.add(cacheObj3)
         defaultCache.update(values)
 
         when:
-        values.remove(cacheObj3.getMd5Sum())
+        values.remove(cacheObj3)
         def cacheObj4 = new CacheObject("test-value4")
-        values.put(cacheObj4.getMd5Sum(), cacheObj4)
+        values.add(cacheObj4)
         defaultCache.update(values)
 
         then:
@@ -86,8 +83,8 @@ class FintCacheSpec extends Specification {
     def "Refresh cache"() {
         given:
         def cacheObj = new CacheObject("test-value")
-        def values = new HashMap()
-        values.put(cacheObj.getMd5Sum(), cacheObj)
+        def values = new ArrayList()
+        values.add(cacheObj)
 
         when:
         defaultCache.refresh(values)
@@ -99,8 +96,8 @@ class FintCacheSpec extends Specification {
     def "Flush cache"() {
         given:
         def cacheObj = new CacheObject("test-value")
-        def values = new HashMap()
-        values.put(cacheObj.getMd5Sum(), cacheObj)
+        def values = new ArrayList()
+        values.add(cacheObj)
         defaultCache.update(values)
 
         when:
@@ -115,8 +112,8 @@ class FintCacheSpec extends Specification {
     def "Get updated cache objects since timestamp, new objects"() {
         given:
         def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
-        def values = new HashMap()
-        values.put(cacheObj.getMd5Sum(), cacheObj)
+        def values = new ArrayList()
+        values.add(cacheObj)
         defaultCache.update(values)
 
         when:
@@ -129,8 +126,8 @@ class FintCacheSpec extends Specification {
     def "Get updated cache objects since timestamp, no new objects"() {
         given:
         def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
-        def values = new HashMap()
-        values.put(cacheObj.getMd5Sum(), cacheObj)
+        def values = new ArrayList()
+        values.add(cacheObj)
         defaultCache.update(values)
 
         when:
@@ -143,14 +140,14 @@ class FintCacheSpec extends Specification {
     def "Get cache"() {
         given:
         def cacheObj = new CacheObject("test-value")
-        def values = new HashMap()
-        values.put(cacheObj.getMd5Sum(), cacheObj)
+        def values = new ArrayList()
+        values.add(cacheObj)
         defaultCache.update(values)
 
         when:
         def cachedValues = defaultCache.get()
 
         then:
-        cachedValues[0] == values.values()[0]
+        cachedValues[0].getObject() == values.get(0)
     }
 }

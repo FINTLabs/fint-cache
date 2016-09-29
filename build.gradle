@@ -9,7 +9,7 @@ buildscript {
 }
 
 group = 'no.fint'
-version = '0.0.2-SNAPSHOT'
+version = '0.0.3-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -38,4 +38,6 @@ dependencies {
     testCompile('org.spockframework:spock-spring:1.0-groovy-2.4')
 }
 
-apply from: "${projectDir}/bintray.gradle"
+if (project.hasProperty('bintrayUser') && project.hasProperty('bintrayKey')) {
+    apply from: "${projectDir}/bintray.gradle"
+}

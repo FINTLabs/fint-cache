@@ -4,10 +4,10 @@ import no.fint.cache.model.CacheObject;
 
 import java.util.List;
 
-public interface Cache {
-    void update(List<?> objects);
-    void refresh(List<?> objects);
+public interface Cache<T> {
+    void update(List<T> objects);
+    void refresh(List<T> objects);
     void flush();
-    List<CacheObject<?>> get();
-    List<CacheObject<?>> getSince(long timestamp);
+    List<CacheObject<T>> get();
+    List<CacheObject<T>> getSince(long timestamp);
 }

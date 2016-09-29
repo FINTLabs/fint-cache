@@ -1,20 +1,19 @@
 package no.fint.cache.model;
 
-import java.util.Date;
 import static org.springframework.util.DigestUtils.md5DigestAsHex;
 
-public class CacheObject {
+public class CacheObject<T> {
     private String md5Sum;
     private long lastUpdated;
-    private Object object;
+    private T object;
 
-    public CacheObject(Object obj) {
+    public CacheObject(T obj) {
         object = obj;
         lastUpdated = System.currentTimeMillis();
         md5Sum = md5DigestAsHex(object.toString().getBytes());
     }
 
-    CacheObject(Object obj, long timestamp) {
+    CacheObject(T obj, long timestamp) {
         object = obj;
         lastUpdated = timestamp;
         md5Sum = md5DigestAsHex(object.toString().getBytes());
@@ -28,7 +27,7 @@ public class CacheObject {
         return lastUpdated;
     }
 
-    public Object getObject() {
+    public T getObject() {
         return object;
     }
 

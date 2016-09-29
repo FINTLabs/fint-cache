@@ -14,7 +14,7 @@ import static org.springframework.util.DigestUtils.md5DigestAsHex;
 public class FintCache implements Cache {
 
     private CacheMetaData cacheMetaData;
-    private List<CacheObject> cacheObjectList;
+    private List<CacheObject<?>> cacheObjectList;
 
     public FintCache() {
         cacheMetaData = new CacheMetaData();
@@ -22,14 +22,12 @@ public class FintCache implements Cache {
     }
 
     public void update(List<?> objects) {
-        Map<String, CacheObject> cacheObjectMap;
-
-        cacheObjectMap = getMap(objects);
+        Map<String, CacheObject<?>> cacheObjectMap = getMap(objects);
 
         if (cacheObjectList.isEmpty()) {
             cacheObjectList.addAll(cacheObjectMap.values());
         } else {
-            List<CacheObject> cacheObjectListCopy = new ArrayList<>(cacheObjectList);
+            List<CacheObject<?>> cacheObjectListCopy = new ArrayList<>(cacheObjectList);
             cacheObjectList.forEach(cacheObject -> {
                 String md5sum = cacheObject.getMd5Sum();
                 if (cacheObjectMap.containsKey(md5sum)) {
@@ -56,35 +54,25 @@ public class FintCache implements Cache {
         cacheObjectList.clear();
     }
 
-    public List<CacheObject> get() {
+    public List<CacheObject<?>> get() {
         return cacheObjectList;
     }
 
-    public List<Object> getSourceList() {
-        List<Object> list = new ArrayList();
-        cacheObjectList.stream().forEach(cacheObject -> {
-            list.add(cacheObject.getObject());
-        });
-
-        return list;
-
+    public List<?> getSourceList() {
+        return cacheObjectList.stream().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
-    public List<CacheObject> getSince(long timestamp) {
+    public List<CacheObject<?>> getSince(long timestamp) {
         return cacheObjectList.stream().filter(cacheObject ->
                 (cacheObject.getLastUpdated() >= timestamp)).collect(Collectors.toList());
     }
 
-    public List<Object> getSourceListSince(long timestamp) {
-        List<Object> list = new ArrayList();
-        cacheObjectList.stream().filter(cacheObject ->
+    public List<?> getSourceListSince(long timestamp) {
+        return cacheObjectList.stream().filter(cacheObject ->
                 (cacheObject.getLastUpdated() >= timestamp))
                 .collect(Collectors.toList())
-                .forEach(cacheObject -> {
-                    list.add(cacheObject.getObject());
-                });
-
-        return list;
+                .stream().map(CacheObject::getObject)
+                .collect(Collectors.toList());
     }
 
 
@@ -94,11 +82,11 @@ public class FintCache implements Cache {
         cacheMetaData.setMd5Sum(md5DigestAsHex(cacheObjectList.toString().getBytes()));
     }
 
-    private Map<String, CacheObject> getMap(List<?> list) {
-        Map<String, CacheObject> cacheObjectMap = new HashMap<>();
+    private Map<String, CacheObject<?>> getMap(List<?> list) {
+        Map<String, CacheObject<?>> cacheObjectMap = new HashMap<>();
 
-        list.stream().forEach(o -> {
-            CacheObject cacheObject = new CacheObject(o);
+        list.forEach(o -> {
+            CacheObject<?> cacheObject = new CacheObject<>(o);
             cacheObjectMap.put(cacheObject.getMd5Sum(), cacheObject);
         });
 

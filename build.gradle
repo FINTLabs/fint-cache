@@ -1,27 +1,26 @@
 buildscript {
-    ext {
-        springBootVersion = '1.4.1.RELEASE'
-    }
     repositories {
+        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7')
     }
 }
 
-group 'no.fint'
-version '0.0.1-SNAPSHOT'
+group = 'no.fint'
+version = '0.0.2-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'groovy'
-apply plugin: 'spring-boot'
+apply plugin: 'com.jfrog.bintray'
 
 jar {
     baseName = 'fint-cache'
-    version = '0.0.1-SNAPSHOT'
+    version = version
 }
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -32,9 +31,11 @@ repositories {
 
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.projectlombok:lombok')
+    compile('org.springframework.boot:spring-boot-starter-web:1.4.1.RELEASE')
+    compile('org.projectlombok:lombok:1.16.10')
 
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.boot:spring-boot-starter-test:1.4.1.RELEASE')
     testCompile('org.spockframework:spock-spring:1.0-groovy-2.4')
 }
+
+apply from: "${projectDir}/bintray.gradle"

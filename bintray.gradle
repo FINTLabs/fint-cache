@@ -1,0 +1,20 @@
+bintrayUpload {
+    dependsOn assemble
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    publish = true
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        userOrg = 'fint'
+        name = jar.baseName
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/FINTprosjektet/fint-cache'
+        version {
+            name = jar.version
+        }
+    }
+}

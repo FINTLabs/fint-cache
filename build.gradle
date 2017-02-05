@@ -32,5 +32,5 @@ dependencies {
 }
 
 if (project.hasProperty('bintrayUser') && project.hasProperty('bintrayKey')) {
-    apply from: "https://raw.githubusercontent.com/FINTprosjektet/fint-buildscripts/master/bintray.gradle"
+    apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/master/bintray.gradle'
 }

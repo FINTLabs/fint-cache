@@ -4,3 +4,5 @@ jdk:
 install: true
 script:
  ./gradlew build
+notifications:
+ slack: fintd:vWWYpAavtMrWpJEZtyuVxdkL

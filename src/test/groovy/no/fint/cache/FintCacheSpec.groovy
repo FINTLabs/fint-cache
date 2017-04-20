@@ -191,6 +191,7 @@ class FintCacheSpec extends Specification {
         def updatedSince = defaultCache.getSourceListSince(System.currentTimeMillis() + 15000)
 
         then:
+        defaultCache.getLastUpdated() > 0
         updatedSince.size() == 0
     }
 }

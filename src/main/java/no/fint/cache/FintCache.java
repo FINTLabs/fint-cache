@@ -1,5 +1,6 @@
 package no.fint.cache;
 
+import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheMetaData;
 import no.fint.cache.model.CacheObject;
 
@@ -11,8 +12,8 @@ import java.util.stream.Collectors;
 
 import static org.springframework.util.DigestUtils.md5DigestAsHex;
 
+@Slf4j
 public class FintCache<T> implements Cache<T> {
-
     private CacheMetaData cacheMetaData;
     private List<CacheObject<T>> cacheObjectList;
 
@@ -23,8 +24,8 @@ public class FintCache<T> implements Cache<T> {
 
     public void update(List<T> objects) {
         Map<String, CacheObject<T>> cacheObjectMap = getMap(objects);
-
         if (cacheObjectList.isEmpty()) {
+            log.debug("Empty cache, adding all values");
             cacheObjectList.addAll(cacheObjectMap.values());
         } else {
             List<CacheObject<T>> cacheObjectListCopy = new ArrayList<>(cacheObjectList);
@@ -33,6 +34,7 @@ public class FintCache<T> implements Cache<T> {
                 if (cacheObjectMap.containsKey(md5sum)) {
                     cacheObjectMap.remove(md5sum);
                 } else {
+                    log.debug("Adding new object to the cache (md5: {})", cacheObject.getMd5Sum());
                     cacheObjectListCopy.remove(cacheObject);
                 }
             });
@@ -84,7 +86,6 @@ public class FintCache<T> implements Cache<T> {
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
         Map<String, CacheObject<T>> cacheObjectMap = new HashMap<>();
-
         list.forEach(o -> {
             CacheObject<T> cacheObject = new CacheObject<>(o);
             cacheObjectMap.put(cacheObject.getMd5Sum(), cacheObject);

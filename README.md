@@ -11,7 +11,7 @@ repositories {
     }
 }
 
-compile('no.fint:fint-cache:0.0.4-SNAPSHOT')
+compile('no.fint:fint-cache:0.0.3')
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ cache.update(data);
 Get values from cache.
 
 ```java
-List<TestDto> cachedList = cache.getSourceList()
+List<TestDto> cachedList = cache.getSourceList();
 ```
 
 To add more logging, enable debug log level for FintCache.

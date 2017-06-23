@@ -46,14 +46,16 @@ class FintCacheIntegrationSpec extends Specification {
         values.contains('test2')
     }
 
-    def "Return empty list when no values are present in cache"() {
+    def "Return empty list when the cache is not present"() {
         given:
-        testCacheService.flush(cacheUri)
+        def uri = CacheUri.create('rogfk.no', 'test234')
+        testCacheService.createCache(uri)
 
         when:
-        def values = testCacheService.getAll(cacheUri)
+        def values = testCacheService.getAll(uri)
 
         then:
+        testCacheService.remove(uri)
         values.size() == 0
     }
 

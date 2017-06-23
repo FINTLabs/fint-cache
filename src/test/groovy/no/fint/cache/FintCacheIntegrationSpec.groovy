@@ -49,13 +49,11 @@ class FintCacheIntegrationSpec extends Specification {
     def "Return empty list when the cache is not present"() {
         given:
         def uri = CacheUri.create('rogfk.no', 'test234')
-        testCacheService.createCache(uri)
 
         when:
         def values = testCacheService.getAll(uri, System.currentTimeMillis())
 
         then:
-        testCacheService.remove(uri)
         values.size() == 0
     }
 

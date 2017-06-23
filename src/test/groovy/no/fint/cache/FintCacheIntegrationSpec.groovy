@@ -52,7 +52,7 @@ class FintCacheIntegrationSpec extends Specification {
         testCacheService.createCache(uri)
 
         when:
-        def values = testCacheService.getAll(uri)
+        def values = testCacheService.getAll(uri, System.currentTimeMillis())
 
         then:
         testCacheService.remove(uri)

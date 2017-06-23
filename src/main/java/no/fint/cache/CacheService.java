@@ -32,10 +32,6 @@ public abstract class CacheService<T> {
     }
 
     public Optional<Cache<T>> getCache(String cacheUri) {
-        if (cacheUri == null) {
-            return Optional.empty();
-        }
-
         return Optional.ofNullable(caches.get(cacheUri));
     }
 

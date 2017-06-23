@@ -42,8 +42,8 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         values.size() == 2
-        values[1] == 'test1'
-        values[0] == 'test2'
+        values.contains('test1')
+        values.contains('test2')
     }
 
     def "Return empty list when no values are present in cache"() {
@@ -72,8 +72,8 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         values.size() == 2
-        values[1] == 'test1'
-        values[0] == 'test2'
+        values.contains('test1')
+        values.contains('test2')
     }
 
     def "Return no values when there are no updates since timestamp"() {

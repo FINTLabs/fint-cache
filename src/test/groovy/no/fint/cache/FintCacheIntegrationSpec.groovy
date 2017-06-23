@@ -20,7 +20,7 @@ class FintCacheIntegrationSpec extends Specification {
     }
 
     void cleanup() {
-        testCacheService.flush(cacheUri)
+        testCacheService.remove(cacheUri)
     }
 
     def "Create cache"() {
@@ -31,10 +31,11 @@ class FintCacheIntegrationSpec extends Specification {
         def cache = testCacheService.createCache(uri)
 
         then:
+        testCacheService.remove(CacheUri.create('rogfk.no', 'test123'))
         cache != null
         testCacheService.getAll(uri).size() == 0
     }
-    
+
     def "Get all values from cache"() {
         when:
         def values = testCacheService.getAll(cacheUri)
@@ -88,5 +89,23 @@ class FintCacheIntegrationSpec extends Specification {
         then:
         values.size() == 3
         values.contains('test3')
+    }
+
+    def "Get keys"() {
+        when:
+        def keys = testCacheService.getKeys()
+
+        then:
+        keys.size() == 1
+        keys[0] == CacheUri.create('rogfk.no', 'test')
+    }
+
+    def "Flush cache"() {
+        when:
+        testCacheService.flush(cacheUri)
+        def values = testCacheService.getAll(cacheUri)
+
+        then:
+        values.size() == 0
     }
 }

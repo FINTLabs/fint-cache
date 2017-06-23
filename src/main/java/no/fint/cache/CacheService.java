@@ -74,4 +74,12 @@ public abstract class CacheService<T> {
         cache.ifPresent(Cache::flush);
     }
 
+    public void remove(String cacheUri) {
+        Optional<Cache<T>> cache = getCache(cacheUri);
+        cache.ifPresent(c -> {
+            c.flush();
+            caches.remove(cacheUri);
+        });
+    }
+
 }

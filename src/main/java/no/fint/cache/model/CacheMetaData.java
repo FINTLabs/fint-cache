@@ -1,19 +1,15 @@
 package no.fint.cache.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-import java.util.Date;
-
-@Getter
-@Setter
+@Data
 public class CacheMetaData {
-    private String md5Sum;
+    private String checksum;
     private long lastUpdated;
     private int cacheCount;
 
     public CacheMetaData() {
-        md5Sum = null;
+        checksum = null;
         lastUpdated = 0;
         cacheCount = 0;
     }

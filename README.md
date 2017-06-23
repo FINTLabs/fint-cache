@@ -16,18 +16,34 @@ compile('no.fint:fint-cache:0.0.3')
 
 ## Usage
 
-Create and update cache.
-
+Create and update cache:
 ```java
 List<TestDto> data = Lists.newArrayList(new TestDto());
 FintCache<TestDto> cache = new FintCache<>();
 cache.update(data);
 ```
 
-Get values from cache.
-
+Get values from cache:
 ```java
 List<TestDto> cachedList = cache.getSourceList();
+```
+
+Integration with Spring bean:
+```java
+@Component
+public class MyCacheService extends CacheService<String> {
+    
+    @PostConstruct
+    public void init() {
+        ...
+    }
+    
+    @PreDestroy
+    public void cleanUp() {
+        ...
+    }
+    
+}
 ```
 
 To add more logging, enable debug log level for FintCache.

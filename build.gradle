@@ -28,9 +28,11 @@ apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.0.1
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
     compile("org.projectlombok:lombok:${lombokVersion}")
+    compile('commons-codec:commons-codec:1.10')
 
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("org.spockframework:spock-spring:${spockSpringVersion}")
+    testCompile("org.spockframework:spock-core:${spockSpringVersion}")
 }
 
 task wrapper(type: Wrapper) {

@@ -4,7 +4,6 @@ import no.fint.cache.model.CacheObject
 import no.fint.cache.model.TestUtil
 import spock.lang.Specification
 
-
 class FintCacheSpec extends Specification {
     private FintCache defaultCache
 
@@ -25,12 +24,12 @@ class FintCacheSpec extends Specification {
 
     def "Update cache, add new object"() {
         given:
-        def cacheObj1 = new CacheObject("test-value1")
+        def cacheObj1 = new CacheObject('test-value1')
         def values = new ArrayList()
         values.add(cacheObj1);
         defaultCache.update(values)
 
-        def cacheObj2 = new CacheObject("test-value2")
+        def cacheObj2 = new CacheObject('test-value2')
         values.add(cacheObj2)
 
         when:
@@ -42,9 +41,9 @@ class FintCacheSpec extends Specification {
 
     def "Update cache, remove existing object"() {
         given:
-        def cacheObj1 = new CacheObject("test-value1")
-        def cacheObj2 = new CacheObject("test-value2")
-        def cacheObj3 = new CacheObject("test-value3")
+        def cacheObj1 = new CacheObject('test-value1')
+        def cacheObj2 = new CacheObject('test-value2')
+        def cacheObj3 = new CacheObject('test-value3')
         def values = new ArrayList()
         values.add(cacheObj1)
         values.add(cacheObj2)
@@ -61,9 +60,9 @@ class FintCacheSpec extends Specification {
 
     def "Update cache, update content of existing object"() {
         given:
-        def cacheObj1 = new CacheObject("test-value1")
-        def cacheObj2 = new CacheObject("test-value2")
-        def cacheObj3 = new CacheObject("test-value3")
+        def cacheObj1 = new CacheObject('test-value1')
+        def cacheObj2 = new CacheObject('test-value2')
+        def cacheObj3 = new CacheObject('test-value3')
         def values = new ArrayList()
         values.add(cacheObj1)
         values.add(cacheObj2)
@@ -72,7 +71,7 @@ class FintCacheSpec extends Specification {
 
         when:
         values.remove(cacheObj3)
-        def cacheObj4 = new CacheObject("test-value4")
+        def cacheObj4 = new CacheObject('test-value4')
         values.add(cacheObj4)
         defaultCache.update(values)
 
@@ -80,9 +79,23 @@ class FintCacheSpec extends Specification {
         defaultCache.cacheMetaData.cacheCount == 3
     }
 
+    def "Update cache, existing content and empty update"() {
+        given:
+        def cacheObj = new CacheObject('test-value')
+        def values = new ArrayList()
+        values.add(cacheObj)
+        defaultCache.update(values)
+
+        when:
+        defaultCache.update([])
+
+        then:
+        defaultCache.cacheMetaData.cacheCount == 1
+    }
+
     def "Refresh cache"() {
         given:
-        def cacheObj = new CacheObject("test-value")
+        def cacheObj = new CacheObject('test-value')
         def values = new ArrayList()
         values.add(cacheObj)
 
@@ -95,7 +108,7 @@ class FintCacheSpec extends Specification {
 
     def "Flush cache"() {
         given:
-        def cacheObj = new CacheObject("test-value")
+        def cacheObj = new CacheObject('test-value')
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)
@@ -106,12 +119,12 @@ class FintCacheSpec extends Specification {
         then:
         defaultCache.cacheMetaData.cacheCount == 0
         defaultCache.cacheMetaData.lastUpdated == 0
-        defaultCache.cacheMetaData.md5Sum == null
+        defaultCache.cacheMetaData.checksum == null
     }
 
     def "Get updated cache objects since timestamp, new objects"() {
         given:
-        def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
+        def cacheObj = TestUtil.createCacheObject('test-value', System.currentTimeMillis() - 10000)
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)
@@ -125,7 +138,7 @@ class FintCacheSpec extends Specification {
 
     def "Get updated cache objects since timestamp, no new objects"() {
         given:
-        def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
+        def cacheObj = TestUtil.createCacheObject('test-value', System.currentTimeMillis() - 10000)
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)
@@ -139,7 +152,7 @@ class FintCacheSpec extends Specification {
 
     def "Get cache"() {
         given:
-        def cacheObj = new CacheObject("test-value")
+        def cacheObj = new CacheObject('test-value')
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)
@@ -153,7 +166,7 @@ class FintCacheSpec extends Specification {
 
     def "Get source list"() {
         given:
-        def cacheObj = new CacheObject("test-value")
+        def cacheObj = new CacheObject('test-value')
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)
@@ -167,7 +180,7 @@ class FintCacheSpec extends Specification {
 
     def "Get updated source objects since timestamp, new objects"() {
         given:
-        def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
+        def cacheObj = TestUtil.createCacheObject('test-value', System.currentTimeMillis() - 10000)
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)
@@ -182,7 +195,7 @@ class FintCacheSpec extends Specification {
 
     def "Get updated source objects since timestamp, no new objects"() {
         given:
-        def cacheObj = TestUtil.createCacheObject("test-value", System.currentTimeMillis() - 10000)
+        def cacheObj = TestUtil.createCacheObject('test-value', System.currentTimeMillis() - 10000)
         def values = new ArrayList()
         values.add(cacheObj)
         defaultCache.update(values)

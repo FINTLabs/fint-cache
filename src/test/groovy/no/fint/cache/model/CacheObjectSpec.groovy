@@ -13,7 +13,7 @@ class CacheObjectSpec extends Specification {
         def cacheObject = new CacheObject(obj)
 
         then:
-        cacheObject.md5Sum != null
+        cacheObject.checksum != null
         cacheObject.lastUpdated != null
         cacheObject.object == obj
     }

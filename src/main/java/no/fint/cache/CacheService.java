@@ -39,23 +39,23 @@ public abstract class CacheService<T> {
         return Optional.ofNullable(caches.get(cacheUri));
     }
 
-    public Set<T> getAll(String cacheUri) {
+    public List<T> getAll(String cacheUri) {
         Optional<Cache<T>> cache = getCache(cacheUri);
         if (cache.isPresent()) {
             List<CacheObject<T>> cacheObjects = cache.get().get();
-            return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toSet());
+            return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toList());
         } else {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
     }
 
-    public Set<T> getAll(String cacheUri, long sinceTimestamp) {
+    public List<T> getAll(String cacheUri, long sinceTimestamp) {
         Optional<Cache<T>> cache = getCache(cacheUri);
         if (cache.isPresent()) {
             List<CacheObject<T>> cacheObjects = cache.get().getSince(sinceTimestamp);
-            return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toSet());
+            return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toList());
         } else {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
     }
 

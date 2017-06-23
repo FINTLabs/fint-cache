@@ -46,6 +46,17 @@ class FintCacheIntegrationSpec extends Specification {
         values[0] == 'test2'
     }
 
+    def "Return empty list when no values are present in cache"() {
+        given:
+        testCacheService.flush(cacheUri)
+
+        when:
+        def values = testCacheService.getAll(cacheUri)
+
+        then:
+        values.size() == 0
+    }
+
     def "Add items to cache"() {
         when:
         testCacheService.add(cacheUri, ['test3'])

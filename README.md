@@ -33,6 +33,12 @@ Integration with Spring bean:
 @Component
 public class MyCacheService extends CacheService<String> {
     
+    public static final String MODEL = "test";
+    
+    public TestCacheService() {
+        super(MODEL);
+    }
+    
     @PostConstruct
     public void init() {
         ...
@@ -41,11 +47,6 @@ public class MyCacheService extends CacheService<String> {
     @PreDestroy
     public void cleanUp() {
         ...
-    }
-    
-    @Override
-    protected String getModel() {
-        return "MyModel";
     }
     
 }

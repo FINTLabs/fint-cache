@@ -10,30 +10,36 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class CacheService<T> {
 
+    private final String model;
+
     private Map<String, Cache<T>> caches = new HashMap<>();
 
     public Set<String> getKeys() {
         return caches.keySet();
     }
 
+    public CacheService(String model) {
+        this.model = model;
+    }
+
     public Cache<T> createCache(String orgId) {
         FintCache<T> cache = new FintCache<>();
-        caches.put(CacheUri.create(orgId, getModel()),cache);
+        caches.put(CacheUri.create(orgId, model),cache);
         return cache;
     }
 
     public void put(String orgId, FintCache<T> cache) {
-        caches.put(CacheUri.create(orgId, getModel()), cache);
+        caches.put(CacheUri.create(orgId, model), cache);
     }
 
     @SuppressWarnings("unchecked")
     public long getLastUpdated(String orgId) {
-        FintCache<T> fintCache = (FintCache) caches.get(CacheUri.create(orgId, getModel()));
+        FintCache<T> fintCache = (FintCache) caches.get(CacheUri.create(orgId, model));
         return fintCache.getLastUpdated();
     }
 
     public Optional<Cache<T>> getCache(String orgId) {
-        return Optional.ofNullable(caches.get(CacheUri.create(orgId, getModel())));
+        return Optional.ofNullable(caches.get(CacheUri.create(orgId, model)));
     }
 
     public List<T> getAll(String orgId) {
@@ -78,6 +84,4 @@ public abstract class CacheService<T> {
             caches.remove(orgId);
         });
     }
-
-    protected abstract String getModel();
 }

@@ -11,7 +11,7 @@ repositories {
     }
 }
 
-compile('no.fint:fint-cache:0.0.6')
+compile('no.fint:fint-cache:0.0.7')
 ```
 
 ## Usage

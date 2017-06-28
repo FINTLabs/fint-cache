@@ -12,4 +12,12 @@ class CacheUriSpec extends Specification {
         cacheUri == 'urn:fint.no:rogfk.no:personalressurs'
     }
 
+    def "Throw IllegalArgumentException if model is null"() {
+        when:
+        CacheUri.create('rogfk.no', null)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
 }

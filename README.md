@@ -43,6 +43,11 @@ public class MyCacheService extends CacheService<String> {
         ...
     }
     
+    @Override
+    protected String getModel() {
+        return "MyModel";
+    }
+    
 }
 ```
 

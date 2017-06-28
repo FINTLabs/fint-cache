@@ -8,37 +8,32 @@ import spock.lang.Specification
 
 @SpringBootTest(classes = TestCacheService)
 class FintCacheIntegrationSpec extends Specification {
-    private final String cacheUri = CacheUri.create('rogfk.no', 'test')
-
     @Autowired
     private TestCacheService testCacheService
 
     void setup() {
         def cache = new FintCache<String>()
         cache.update(['test1', 'test2'])
-        testCacheService.put(cacheUri, cache)
+        testCacheService.put('rogfk.no', cache)
     }
 
     void cleanup() {
-        testCacheService.remove(cacheUri)
+        testCacheService.remove('rogfk.no')
     }
 
     def "Create cache"() {
-        given:
-        def uri = CacheUri.create('rogfk.no', 'test123')
-
         when:
-        def cache = testCacheService.createCache(uri)
+        def cache = testCacheService.createCache('rogfk.no')
 
         then:
-        testCacheService.remove(CacheUri.create('rogfk.no', 'test123'))
+        testCacheService.remove('rogfk.no')
         cache != null
-        testCacheService.getAll(uri).size() == 0
+        testCacheService.getAll('rogfk.no').size() == 0
     }
 
     def "Get all values from cache"() {
         when:
-        def values = testCacheService.getAll(cacheUri)
+        def values = testCacheService.getAll('rogfk.no')
 
         then:
         values.size() == 2
@@ -47,11 +42,8 @@ class FintCacheIntegrationSpec extends Specification {
     }
 
     def "Return empty list when the cache is not present"() {
-        given:
-        def uri = CacheUri.create('rogfk.no', 'test234')
-
         when:
-        def values = testCacheService.getAll(uri, System.currentTimeMillis())
+        def values = testCacheService.getAll('unknown-org', System.currentTimeMillis())
 
         then:
         values.size() == 0
@@ -59,8 +51,8 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "Add items to cache"() {
         when:
-        testCacheService.add(cacheUri, ['test3'])
-        def values = testCacheService.getAll(cacheUri)
+        testCacheService.add('rogfk.no', ['test3'])
+        def values = testCacheService.getAll('rogfk.no')
 
         then:
         values.size() == 3
@@ -68,7 +60,7 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "Get all values since timestamp"() {
         when:
-        def values = testCacheService.getAll(cacheUri, System.currentTimeMillis() - 500)
+        def values = testCacheService.getAll('rogfk.no', System.currentTimeMillis() - 500)
 
         then:
         values.size() == 2
@@ -78,7 +70,7 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "Return no values when there are no updates since timestamp"() {
         when:
-        def values = testCacheService.getAll(cacheUri, System.currentTimeMillis() + 500)
+        def values = testCacheService.getAll('rogfk.no', System.currentTimeMillis() + 500)
 
         then:
         values.size() == 0
@@ -86,7 +78,7 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "Get last updated"() {
         when:
-        def lastUpdated = testCacheService.getLastUpdated(cacheUri)
+        def lastUpdated = testCacheService.getLastUpdated('rogfk.no')
 
         then:
         lastUpdated < System.currentTimeMillis()
@@ -94,8 +86,8 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "Update cache, add new value"() {
         when:
-        testCacheService.update(cacheUri, ['test1', 'test2', 'test3'])
-        def values = testCacheService.getAll(cacheUri)
+        testCacheService.update('rogfk.no', ['test1', 'test2', 'test3'])
+        def values = testCacheService.getAll('rogfk.no')
 
         then:
         values.size() == 3
@@ -113,8 +105,8 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "Flush cache"() {
         when:
-        testCacheService.flush(cacheUri)
-        def values = testCacheService.getAll(cacheUri)
+        testCacheService.flush('rogfk.no')
+        def values = testCacheService.getAll('rogfk.no')
 
         then:
         values.size() == 0

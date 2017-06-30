@@ -14,6 +14,10 @@ public abstract class CacheService<T> {
 
     private Map<String, Cache<T>> caches = new HashMap<>();
 
+    public boolean hasItems() {
+        return caches.size() > 0;
+    }
+
     public Set<String> getKeys() {
         return caches.keySet();
     }
@@ -24,7 +28,7 @@ public abstract class CacheService<T> {
 
     public Cache<T> createCache(String orgId) {
         FintCache<T> cache = new FintCache<>();
-        caches.put(CacheUri.create(orgId, model),cache);
+        caches.put(CacheUri.create(orgId, model), cache);
         return cache;
     }
 

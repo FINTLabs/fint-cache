@@ -36,6 +36,7 @@ class FintCacheIntegrationSpec extends Specification {
         def values = testCacheService.getAll('rogfk.no')
 
         then:
+        testCacheService.hasItems()
         values.size() == 2
         values.contains('test1')
         values.contains('test2')

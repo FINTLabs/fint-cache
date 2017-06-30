@@ -17,4 +17,18 @@ public class CacheUri {
 
         return String.format("urn:fint.no:%s:%s", orgId, model);
     }
+
+    public static boolean containsOrgId(String cacheUri, String orgId) {
+        if (StringUtils.isEmpty(cacheUri) || StringUtils.isEmpty(orgId)) {
+            throw new IllegalArgumentException("Input value for cacheUri and orgId cannot be null");
+        }
+
+        String[] parts = cacheUri.split(":");
+        if (parts.length == 4) {
+            String org = parts[2];
+            return (org.equals(orgId));
+        } else {
+            throw new IllegalArgumentException("Invalid cacheUri format");
+        }
+    }
 }

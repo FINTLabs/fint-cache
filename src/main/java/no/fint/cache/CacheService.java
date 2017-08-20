@@ -5,6 +5,7 @@ import no.fint.cache.model.CacheObject;
 import no.fint.cache.utils.CacheUri;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -64,6 +65,10 @@ public abstract class CacheService<T> {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public Optional<T> getOne(String orgId, Predicate<T> idFunction) {
+        return getAll(orgId).stream().filter(idFunction).findFirst();
     }
 
     public void update(String orgId, List<T> objects) {

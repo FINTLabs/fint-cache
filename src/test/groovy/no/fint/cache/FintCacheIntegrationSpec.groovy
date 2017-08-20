@@ -69,6 +69,15 @@ class FintCacheIntegrationSpec extends Specification {
         values.contains('test2')
     }
 
+    def "Get one value"() {
+        when:
+        def one = testCacheService.getOne('rogfk.no', 'test1')
+
+        then:
+        one.isPresent()
+        one.get() == 'test1'
+    }
+
     def "Return no values when there are no updates since timestamp"() {
         when:
         def values = testCacheService.getAll('rogfk.no', System.currentTimeMillis() + 500)

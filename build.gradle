@@ -29,7 +29,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
     compile("org.projectlombok:lombok:${lombokVersion}")
     compile('commons-codec:commons-codec:1.10')
-    compile('com.google.guava:guava:22.0')
+    compile('com.google.guava:guava:23.0')
 
     testCompile('cglib:cglib-nodep:3.2.5')
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")

@@ -1,5 +1,6 @@
 package no.fint.cache;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.utils.CacheUri;
@@ -11,7 +12,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class CacheService<T> {
 
+    @Getter
     private final String model;
+
+    @Getter
+    private List<Enum> actions = new ArrayList<>();
 
     private Map<String, Cache<T>> caches = new HashMap<>();
 
@@ -23,8 +28,11 @@ public abstract class CacheService<T> {
         return caches.keySet();
     }
 
-    public CacheService(String model) {
+    public CacheService(String model, Enum firstAction, Enum... actions) {
         this.model = model;
+        this.actions = new ArrayList<>();
+        this.actions.add(firstAction);
+        this.actions.addAll(Arrays.asList(actions));
     }
 
     public Cache<T> createCache(String orgId) {
@@ -93,4 +101,10 @@ public abstract class CacheService<T> {
             caches.remove(orgId);
         });
     }
+
+    public boolean supportsAction(Enum action) {
+        return actions.contains(action);
+    }
+
+    public abstract void onAction(Enum action);
 }

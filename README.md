@@ -11,7 +11,7 @@ repositories {
     }
 }
 
-compile('no.fint:fint-cache:1.0.1')
+compile('no.fint:fint-cache:1.1.0')
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ public class MyCacheService extends CacheService<String> {
     public static final String MODEL = "test";
     
     public TestCacheService() {
-        super(MODEL);
+        super(MODEL, MyActions.GET_ALL);
     }
     
     @PostConstruct
@@ -46,6 +46,11 @@ public class MyCacheService extends CacheService<String> {
     
     @PreDestroy
     public void cleanUp() {
+        ...
+    }
+    
+    @Override
+    public void onAction(Enum action) {
         ...
     }
     

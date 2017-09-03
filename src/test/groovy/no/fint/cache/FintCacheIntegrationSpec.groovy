@@ -1,5 +1,6 @@
 package no.fint.cache
 
+import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
 import no.fint.cache.utils.TestCacheService
 import org.springframework.beans.factory.annotation.Autowired
@@ -120,5 +121,23 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         values.size() == 0
+    }
+
+    def "Supported actions"() {
+        when:
+        def supportedAction1 = testCacheService.supportsAction(TestAction.SUPPORTED_ACTION_1)
+        def supportedAction2 = testCacheService.supportsAction(TestAction.SUPPORTED_ACTION_2)
+
+        then:
+        supportedAction1
+        supportedAction2
+    }
+
+    def "Not-supported action"() {
+        when:
+        def supportedAction = testCacheService.supportsAction(TestAction.NOT_SUPPORTED_ACTION)
+
+        then:
+        !supportedAction
     }
 }

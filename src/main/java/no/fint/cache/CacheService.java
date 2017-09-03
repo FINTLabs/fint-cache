@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.utils.CacheUri;
+import no.fint.event.model.Event;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -106,5 +107,5 @@ public abstract class CacheService<T> {
         return actions.contains(action);
     }
 
-    public abstract void onAction(Enum action);
+    public abstract void onAction(Enum action, Event event);
 }

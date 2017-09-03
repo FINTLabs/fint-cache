@@ -2,6 +2,7 @@ package no.fint.cache.utils;
 
 import no.fint.cache.CacheService;
 import no.fint.cache.testutils.TestAction;
+import no.fint.event.model.Event;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -20,6 +21,6 @@ public class TestCacheService extends CacheService<String> {
     }
 
     @Override
-    public void onAction(Enum action) {
+    public void onAction(Enum action, Event event) {
     }
 }

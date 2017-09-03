@@ -11,7 +11,7 @@ repositories {
     }
 }
 
-compile('no.fint:fint-cache:1.1.0')
+compile('no.fint:fint-cache:1.1.1')
 ```
 
 ## Usage
@@ -50,7 +50,7 @@ public class MyCacheService extends CacheService<String> {
     }
     
     @Override
-    public void onAction(Enum action) {
+    public void onAction(Enum action, Event event) {
         ...
     }
     

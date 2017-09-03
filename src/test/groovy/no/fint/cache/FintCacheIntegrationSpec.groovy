@@ -133,6 +133,14 @@ class FintCacheIntegrationSpec extends Specification {
         supportedAction2
     }
 
+    def "Supported string action"() {
+        when:
+        def supportedAction = testCacheService.supportsAction(TestAction.SUPPORTED_ACTION_1.name())
+
+        then:
+        supportedAction
+    }
+
     def "Not-supported action"() {
         when:
         def supportedAction = testCacheService.supportsAction(TestAction.NOT_SUPPORTED_ACTION)

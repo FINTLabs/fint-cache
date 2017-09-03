@@ -107,5 +107,10 @@ public abstract class CacheService<T> {
         return actions.contains(action);
     }
 
+    public boolean supportsAction(String action) {
+        List<String> stringActions = actions.stream().map(Enum::name).collect(Collectors.toList());
+        return stringActions.contains(action);
+    }
+
     public abstract void onAction(Enum action, Event event);
 }

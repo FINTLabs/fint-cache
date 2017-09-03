@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'no.fint'
-version = '1.1.1'
+version = '1.1.2'
 
 apply plugin: 'java'
 apply plugin: 'maven'

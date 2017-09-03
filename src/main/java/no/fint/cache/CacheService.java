@@ -112,5 +112,5 @@ public abstract class CacheService<T> {
         return stringActions.contains(action);
     }
 
-    public abstract void onAction(Enum action, Event event);
+    public abstract void onAction(String action, Event event);
 }

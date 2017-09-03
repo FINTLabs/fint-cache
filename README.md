@@ -11,7 +11,7 @@ repositories {
     }
 }
 
-compile('no.fint:fint-cache:1.1.3')
+compile('no.fint:fint-cache:1.2.0')
 ```
 
 ## Usage
@@ -50,7 +50,7 @@ public class MyCacheService extends CacheService<String> {
     }
     
     @Override
-    public void onAction(String action, Event event) {
+    public void onAction(Event event) {
         ...
     }
     

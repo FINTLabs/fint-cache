@@ -21,6 +21,6 @@ public class TestCacheService extends CacheService<String> {
     }
 
     @Override
-    public void onAction(String action, Event event) {
+    public void onAction(Event event) {
     }
 }

@@ -1,10 +1,12 @@
 package no.fint.cache;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.utils.CacheUri;
 import no.fint.event.model.Event;
+import no.fint.event.model.EventUtil;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -112,5 +114,9 @@ public abstract class CacheService<T> {
         return stringActions.contains(action);
     }
 
-    public abstract void onAction(Event event);
+    public void onAction(Event event) {
+        List<T> resources = EventUtil.convertEventData(event, new TypeReference<List<T>>() {
+        });
+        getCache(event.getOrgId()).ifPresent(cache -> cache.update(resources));
+    }
 }

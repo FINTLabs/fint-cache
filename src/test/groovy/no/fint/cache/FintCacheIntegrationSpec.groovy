@@ -3,6 +3,7 @@ package no.fint.cache
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
 import no.fint.cache.utils.TestCacheService
+import no.fint.event.model.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
@@ -147,5 +148,17 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         !supportedAction
+    }
+
+    def "On received event"() {
+        given:
+        def event = new Event(orgId: 'rogfk.no', data: ['test1', 'test2', 'test3'])
+
+        when:
+        testCacheService.onAction(event)
+        def values = testCacheService.getAll('rogfk.no')
+
+        then:
+        values.size() == 3
     }
 }

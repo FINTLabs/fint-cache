@@ -49,11 +49,22 @@ public class MyCacheService extends CacheService<String> {
         ...
     }
     
-    @Override
-    public void onAction(Event event) {
-        ...
-    }
-    
+}
+```
+
+By default the `onAction()` method in `CacheService` will update the cache content.
+```java
+public void onAction(Event event) {
+    List<T> resources = EventUtil.convertEventData(event, new TypeReference<List<T>>() {});
+    getCache(event.getOrgId()).ifPresent(cache -> cache.update(resources));
+}
+```
+
+If you require more specific handling, such as support for multiple event types, override the `onAction()` method.
+```java
+@Override
+public void onAction(Event event) {
+    ...
 }
 ```
 

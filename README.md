@@ -11,7 +11,7 @@ repositories {
     }
 }
 
-compile('no.fint:fint-cache:1.3.0')
+compile('no.fint:fint-cache:1.4.0')
 ```
 
 ## Usage
@@ -49,24 +49,15 @@ public class MyCacheService extends CacheService<String> {
         ...
     }
     
+    @Override
+    public void onAction(Event event) {
+        ...
+    }
 }
 ```
 
-By default the `onAction()` method in `CacheService` will update the cache content.
-```java
-public void onAction(Event event) {
-    List<T> resources = EventUtil.convertEventData(event, new TypeReference<List<T>>() {});
-    getCache(event.getOrgId()).ifPresent(cache -> cache.update(resources));
-}
-```
+Override the `onAction()` method in `CacheService` to handle the events.
 
-If you require more specific handling, such as support for multiple event types, override the `onAction()` method.
-```java
-@Override
-public void onAction(Event event) {
-    ...
-}
-```
 
 To add more logging, enable debug log level for FintCache.
 

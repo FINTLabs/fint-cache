@@ -1,13 +1,15 @@
 package no.fint.cache;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.utils.CacheUri;
 import no.fint.event.model.Event;
-import no.fint.event.model.EventUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,6 +22,9 @@ public abstract class CacheService<T> {
 
     @Getter
     private List<Enum> actions = new ArrayList<>();
+
+    @Autowired(required = false)
+    private ObjectMapper objectMapper;
 
     private Map<String, Cache<T>> caches = new HashMap<>();
 
@@ -36,6 +41,13 @@ public abstract class CacheService<T> {
         this.actions = new ArrayList<>();
         this.actions.add(firstAction);
         this.actions.addAll(Arrays.asList(actions));
+    }
+
+    @PostConstruct
+    public void init() {
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+        }
     }
 
     public Cache<T> createCache(String orgId) {
@@ -87,6 +99,11 @@ public abstract class CacheService<T> {
         cache.ifPresent(c -> c.update(objects));
     }
 
+    public void update(Event event, TypeReference<List<T>> typeReference) {
+        List<T> objects = objectMapper.convertValue(event.getData(), typeReference);
+        update(event.getOrgId(), objects);
+    }
+
     public void add(String orgId, List<T> objects) {
         Optional<Cache<T>> cache = getCache(orgId);
         cache.ifPresent(c -> c.add(objects));
@@ -114,9 +131,5 @@ public abstract class CacheService<T> {
         return stringActions.contains(action);
     }
 
-    public void onAction(Event event) {
-        List<T> resources = EventUtil.convertEventData(event, new TypeReference<List<T>>() {
-        });
-        getCache(event.getOrgId()).ifPresent(cache -> cache.update(resources));
-    }
+    public abstract void onAction(Event event);
 }

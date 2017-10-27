@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'no.fint'
-version = '2.0.0-alpha-2'
+version = '2.0.0-alpha-3'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -30,7 +30,7 @@ repositories {
 apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.0.14/dependencies.gradle'
 dependencies {
     compile('no.fint:fint-event-model:2.0.0')
-    compile('no.fint:fint-hazelcast:1.0.0-alpha-2')
+    compile('no.fint:fint-hazelcast:1.0.0-alpha-3')
 
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
     compile("org.projectlombok:lombok:${lombokVersion}")

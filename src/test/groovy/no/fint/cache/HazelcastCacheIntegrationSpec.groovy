@@ -103,6 +103,7 @@ class HazelcastCacheIntegrationSpec extends Specification {
         def lastUpdated = testCacheService.getLastUpdated('rogfk.no')
 
         then:
+        lastUpdated > 0
         lastUpdated < System.currentTimeMillis()
     }
 

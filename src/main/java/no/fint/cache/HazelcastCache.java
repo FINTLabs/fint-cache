@@ -1,7 +1,6 @@
 package no.fint.cache;
 
 import com.hazelcast.core.IList;
-import com.hazelcast.core.ISet;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
     private final IList<CacheObject<T>> datastore;
-    private volatile long lastUpdated;
 
     public HazelcastCache(IList<CacheObject<T>> datastore) {
         this.datastore = datastore;
@@ -31,7 +29,6 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
         }
         datastore.clear();
         objects.stream().map(CacheObject::new).forEach(datastore::add);
-        lastUpdated = System.currentTimeMillis();
     }
 
     @Override
@@ -43,13 +40,11 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
             }
         }
         datastore.addAll(newItems.values());
-        lastUpdated = System.currentTimeMillis();
     }
 
     @Override
     public void flush() {
         datastore.clear();
-        lastUpdated = System.currentTimeMillis();
     }
 
     @Override
@@ -64,7 +59,7 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public long getLastUpdated() {
-        return lastUpdated;
+        return datastore.stream().mapToLong(CacheObject::getLastUpdated).max().orElse(0L);
     }
 
     @Override

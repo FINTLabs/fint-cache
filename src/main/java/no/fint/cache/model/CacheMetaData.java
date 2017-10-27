@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class CacheMetaData {
-    private String checksum;
+    private byte[] checksum;
     private long lastUpdated;
     private int cacheCount;
 

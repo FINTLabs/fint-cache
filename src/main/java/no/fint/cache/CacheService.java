@@ -10,12 +10,13 @@ import no.fint.event.model.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class CacheService<T> {
+public abstract class CacheService<T extends Serializable> {
 
     @Getter
     private final String model;
@@ -26,14 +27,15 @@ public abstract class CacheService<T> {
     @Autowired(required = false)
     private ObjectMapper objectMapper;
 
-    private Map<String, Cache<T>> caches = new HashMap<>();
+    @Autowired
+    private CacheManager<T> cacheManager;
 
     public boolean hasItems() {
-        return caches.size() > 0;
+        return cacheManager.hasItems();
     }
 
     public Set<String> getKeys() {
-        return caches.keySet();
+        return cacheManager.getKeys();
     }
 
     public CacheService(String model, Enum firstAction, Enum... actions) {
@@ -48,33 +50,30 @@ public abstract class CacheService<T> {
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
         }
+        log.info("Cache Manager {}", cacheManager);
     }
 
     public Cache<T> createCache(String orgId) {
-        FintCache<T> cache = new FintCache<>();
-        caches.put(CacheUri.create(orgId, model), cache);
-        return cache;
+        return cacheManager.createCache(CacheUri.create(orgId, model));
     }
 
-    public void put(String orgId, FintCache<T> cache) {
-        caches.put(CacheUri.create(orgId, model), cache);
+    @Deprecated
+    public void put(String orgId, Cache<T> cache) {
+        createCache(orgId);
     }
-
-    @SuppressWarnings("unchecked")
+    
     public long getLastUpdated(String orgId) {
-        FintCache<T> fintCache = (FintCache) caches.get(CacheUri.create(orgId, model));
-        return fintCache.getLastUpdated();
+        return getCache(orgId).map(Cache::getLastUpdated).orElse(0L);
     }
 
     public Optional<Cache<T>> getCache(String orgId) {
-        return Optional.ofNullable(caches.get(CacheUri.create(orgId, model)));
+        return cacheManager.getCache(CacheUri.create(orgId, model));
     }
 
     public List<T> getAll(String orgId) {
         Optional<Cache<T>> cache = getCache(orgId);
         if (cache.isPresent()) {
-            List<CacheObject<T>> cacheObjects = cache.get().get();
-            return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toList());
+            return cache.get().get().map(CacheObject::getObject).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
@@ -83,15 +82,18 @@ public abstract class CacheService<T> {
     public List<T> getAll(String orgId, long sinceTimestamp) {
         Optional<Cache<T>> cache = getCache(orgId);
         if (cache.isPresent()) {
-            List<CacheObject<T>> cacheObjects = cache.get().getSince(sinceTimestamp);
-            return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toList());
+            return cache.get().getSince(sinceTimestamp).map(CacheObject::getObject).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
     }
 
     public Optional<T> getOne(String orgId, Predicate<T> idFunction) {
-        return getAll(orgId).stream().filter(idFunction).findFirst();
+        Optional<Cache<T>> cache = getCache(orgId);
+        if (cache.isPresent()) {
+            return cache.get().filter(idFunction).map(CacheObject::getObject).findAny();
+        }
+        return Optional.empty();
     }
 
     public void update(String orgId, List<T> objects) {
@@ -115,11 +117,7 @@ public abstract class CacheService<T> {
     }
 
     public void remove(String orgId) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        cache.ifPresent(c -> {
-            c.flush();
-            caches.remove(orgId);
-        });
+        cacheManager.remove(CacheUri.create(orgId, model));
     }
 
     public boolean supportsAction(Enum action) {

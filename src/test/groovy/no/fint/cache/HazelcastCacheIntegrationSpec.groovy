@@ -1,5 +1,6 @@
 package no.fint.cache
 
+import no.fint.cache.testutils.HazelcastConfiguration
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
 import no.fint.cache.utils.TestCacheService
@@ -8,8 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 
-@SpringBootTest(classes = [ FintCacheManager, TestCacheService ])
-class FintCacheIntegrationSpec extends Specification {
+@SpringBootTest(classes = [ HazelcastConfiguration, HazelcastCacheManager, TestCacheService ])
+class HazelcastCacheIntegrationSpec extends Specification {
+
     @Autowired
     private TestCacheService testCacheService
 
@@ -54,6 +56,15 @@ class FintCacheIntegrationSpec extends Specification {
     def "Add items to cache"() {
         when:
         testCacheService.add('rogfk.no', ['test3'])
+        def values = testCacheService.getAll('rogfk.no')
+
+        then:
+        values.size() == 3
+    }
+
+    def "Add existing items to cache"() {
+        when:
+        testCacheService.add('rogfk.no', ['test2', 'test3'])
         def values = testCacheService.getAll('rogfk.no')
 
         then:

@@ -1,16 +1,21 @@
 package no.fint.cache;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheMetaData;
 import no.fint.cache.model.CacheObject;
-import org.apache.commons.codec.digest.DigestUtils;
 
+import java.io.Serializable;
+import java.security.MessageDigest;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
-public class FintCache<T> implements Cache<T> {
+public class FintCache<T extends Serializable> implements Cache<T> {
     @Getter
     private CacheMetaData cacheMetaData;
     private Set<CacheObject<T>> cacheObjectList;
@@ -20,6 +25,7 @@ public class FintCache<T> implements Cache<T> {
         cacheObjectList = new HashSet<>();
     }
 
+    @Override
     public void update(List<T> objects) {
         if (objects.isEmpty()) {
             log.debug("Empty list sent in, will not update cache");
@@ -48,6 +54,7 @@ public class FintCache<T> implements Cache<T> {
         }
     }
 
+    @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newObjects = getMap(objects);
         Set<CacheObject<T>> cachObjectListCopy = new HashSet<>(cacheObjectList);
@@ -56,28 +63,25 @@ public class FintCache<T> implements Cache<T> {
         updateMetaData();
     }
 
-    public void refresh(List<T> objects) {
-        cacheObjectList.clear();
-        update(objects);
-    }
 
+    @Override
     public void flush() {
         flushMetaData();
         cacheObjectList.clear();
     }
 
-    public List<CacheObject<T>> get() {
-        return new ArrayList<>(cacheObjectList);
+    @Override
+    public Stream<CacheObject<T>> get() {
+        return cacheObjectList.stream();
     }
 
     public List<T> getSourceList() {
         return cacheObjectList.stream().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
-    public List<CacheObject<T>> getSince(long timestamp) {
-        Set<CacheObject<T>> values = cacheObjectList.stream().filter(cacheObject ->
-                (cacheObject.getLastUpdated() >= timestamp)).collect(Collectors.toSet());
-        return new ArrayList<>(values);
+    @Override
+    public Stream<CacheObject<T>> getSince(long timestamp) {
+        return cacheObjectList.stream().filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {
@@ -89,20 +93,17 @@ public class FintCache<T> implements Cache<T> {
     }
 
 
+    @SneakyThrows
     private void updateMetaData() {
         cacheMetaData.setCacheCount(cacheObjectList.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
-        cacheMetaData.setChecksum(DigestUtils.sha1Hex(cacheObjectList.toString().getBytes()));
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        cacheObjectList.stream().map(CacheObject::rawChecksum).forEach(digest::update);
+        cacheMetaData.setChecksum(digest.digest());
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        Map<String, CacheObject<T>> cacheObjectMap = new HashMap<>();
-        list.forEach(o -> {
-            CacheObject<T> cacheObject = new CacheObject<>(o);
-            cacheObjectMap.put(cacheObject.getChecksum(), cacheObject);
-        });
-
-        return cacheObjectMap;
+        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
     }
 
     private void flushMetaData() {
@@ -111,7 +112,13 @@ public class FintCache<T> implements Cache<T> {
         cacheMetaData.setChecksum(null);
     }
 
+    @Override
     public long getLastUpdated() {
         return cacheMetaData.getLastUpdated();
+    }
+
+    @Override
+    public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
+        return cacheObjectList.stream().filter(o -> predicate.test(o.getObject()));
     }
 }

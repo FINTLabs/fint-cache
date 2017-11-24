@@ -102,6 +102,7 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public void update(Event event, TypeReference<List<T>> typeReference) {
+    	log.info("Updating cache for org {} for type {}", event.getOrgId(), typeReference.getType());
         List<T> objects = objectMapper.convertValue(event.getData(), typeReference);
         update(event.getOrgId(), objects);
     }

@@ -22,9 +22,10 @@ public abstract class CacheService<T extends Serializable> {
     private final String model;
 
     @Getter
-    private List<Enum> actions = new ArrayList<>();
+    private List<Enum> actions;
 
     @Autowired(required = false)
+    @Deprecated
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -101,6 +102,7 @@ public abstract class CacheService<T extends Serializable> {
         cache.ifPresent(c -> c.update(objects));
     }
 
+    @Deprecated
     public void update(Event event, TypeReference<List<T>> typeReference) {
     	log.info("Updating cache for org {} for type {}", event.getOrgId(), typeReference.getType());
         List<T> objects = objectMapper.convertValue(event.getData(), typeReference);

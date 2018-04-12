@@ -25,7 +25,7 @@ repositories {
     }
 }
 
-apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.1.0/dependencies.gradle'
+apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.3.0/dependencies.gradle'
 dependencies {
     compile('no.fint:fint-event-model:2.0.1')
     compile('no.fint:fint-hazelcast:1.1.1')
@@ -33,7 +33,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
     compile("org.projectlombok:lombok:${lombokVersion}")
     compile('commons-codec:commons-codec:1.11')
-    compile('com.google.guava:guava:23.6-jre')
+    compile('com.google.guava:guava:24.1-jre')
 
     testCompile("cglib:cglib-nodep:${cglibVersion}")
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
@@ -58,5 +58,5 @@ jacocoTestReport {
 }
 
 if (project.hasProperty('bintrayUser') && project.hasProperty('bintrayKey')) {
-    apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.1.0/bintray.gradle'
+    apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.3.0/bintray.gradle'
 }

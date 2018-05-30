@@ -34,11 +34,9 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newItems = getMap(objects);
-        for (int i = 0; i < datastore.size(); ++i) {
-            if (newItems.containsKey(datastore.get(i).getChecksum())) {
-                datastore.remove(i);
-            }
-        }
+        List<CacheObject<T>> updatedItems = datastore.stream().filter(e -> newItems.containsKey(e.getChecksum())).collect(Collectors.toList());
+
+        datastore.removeAll(updatedItems);
         datastore.addAll(newItems.values());
     }
 

@@ -92,7 +92,7 @@ public abstract class CacheService<T extends Serializable> {
     public Optional<T> getOne(String orgId, Predicate<T> idFunction) {
         Optional<Cache<T>> cache = getCache(orgId);
         if (cache.isPresent()) {
-            return cache.get().filter(idFunction).map(CacheObject::getObject).findAny();
+            return cache.get().filter(idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
         }
         return Optional.empty();
     }

@@ -28,6 +28,8 @@ public abstract class CacheService<T extends Serializable> {
     @Deprecated
     private ObjectMapper objectMapper;
 
+    private final Comparator<CacheObject<?>> comparator = (first,second) -> Long.compare(first.getLastUpdated(), second.getLastUpdated());
+
     @Autowired
     private CacheManager<T> cacheManager;
 
@@ -128,9 +130,9 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public boolean supportsAction(String action) {
-        List<String> stringActions = actions.stream().map(Enum::name).collect(Collectors.toList());
-        return stringActions.contains(action);
+        return actions.stream().map(Enum::name).anyMatch(action::equals);
     }
 
     public abstract void onAction(Event event);
+
 }

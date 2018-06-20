@@ -1,71 +1,63 @@
 package no.fint.cache;
 
-import com.hazelcast.core.IList;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
 public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
-    private final IList<CacheObject<T>> datastore;
+    private final HazelcastCacheManager<T> manager;
+    private final String key;
 
-    public HazelcastCache(IList<CacheObject<T>> datastore) {
-        this.datastore = datastore;
+    public HazelcastCache(HazelcastCacheManager<T> manager, String key) {
+        this.manager = manager;
+        this.key = key;
     }
 
     @Override
     public void update(List<T> objects) {
-        if (objects.isEmpty()) {
-            log.debug("Empty list sent in, will not update cache");
-            return;
-        }
-        datastore.clear();
-        objects.stream().map(CacheObject::new).forEach(datastore::add);
+        Cache<T> cache = manager.getCacheInternal(key);
+        cache.update(objects);
+        manager.replace(key, cache);
     }
 
     @Override
     public void add(List<T> objects) {
-        Map<String, CacheObject<T>> newItems = getMap(objects);
-        List<CacheObject<T>> updatedItems = datastore.stream().filter(e -> newItems.containsKey(e.getChecksum())).collect(Collectors.toList());
-
-        datastore.removeAll(updatedItems);
-        datastore.addAll(newItems.values());
+        Cache<T> cache = manager.getCacheInternal(key);
+        cache.add(objects);
+        manager.replace(key, cache);
     }
 
     @Override
     public void flush() {
-        datastore.clear();
+        Cache<T> cache = manager.getCacheInternal(key);
+        cache.flush();
+        manager.replace(key, cache);
     }
 
     @Override
     public Stream<CacheObject<T>> get() {
-        return datastore.stream();
+        return manager.getCacheInternal(key).get();
     }
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return datastore.stream().filter(i -> i.getLastUpdated() > timestamp);
+        return manager.getCacheInternal(key).getSince(timestamp);
     }
 
     @Override
     public long getLastUpdated() {
-        return datastore.stream().mapToLong(CacheObject::getLastUpdated).max().orElse(0L);
+        return manager.getCacheInternal(key).getLastUpdated();
     }
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return datastore.stream().filter(i -> predicate.test(i.getObject()));
+        return manager.getCacheInternal(key).filter(predicate);
     }
 
-    private Map<String, CacheObject<T>> getMap(List<T> items) {
-        return items.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
-    }
 }

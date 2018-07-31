@@ -81,7 +81,7 @@ public class FintCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return cacheObjectList.stream().filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp));
+        return cacheObjectList.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {

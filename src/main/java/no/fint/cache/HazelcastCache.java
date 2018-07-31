@@ -52,7 +52,7 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return datastore.stream().filter(i -> i.getLastUpdated() >= timestamp);
+        return datastore.stream().filter(i -> i.getLastUpdated() > timestamp);
     }
 
     @Override

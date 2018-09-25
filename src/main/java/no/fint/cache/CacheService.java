@@ -28,8 +28,6 @@ public abstract class CacheService<T extends Serializable> {
     @Deprecated
     private ObjectMapper objectMapper;
 
-    private final Comparator<CacheObject<?>> comparator = (first,second) -> Long.compare(first.getLastUpdated(), second.getLastUpdated());
-
     @Autowired
     private CacheManager<T> cacheManager;
 

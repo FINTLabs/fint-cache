@@ -59,6 +59,6 @@ public class HazelcastCacheManager<T extends Serializable> implements CacheManag
     @PostConstruct
     public void init() {
         caches = hazelcast.getMap("fint-caches");
-        log.info("Connected to Hazelcast {} with service name {}", hazelcast.getName(), caches.getServiceName());
+        log.info("Connected to Hazelcast {} with service name {}, {} caches", hazelcast.getName(), caches.getServiceName(), caches.size());
     }
 }

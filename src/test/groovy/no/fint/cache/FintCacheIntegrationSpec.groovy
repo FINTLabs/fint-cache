@@ -92,7 +92,7 @@ class FintCacheIntegrationSpec extends Specification {
         def lastUpdated = testCacheService.getLastUpdated('rogfk.no')
 
         then:
-        lastUpdated < System.currentTimeMillis()
+        lastUpdated <= System.currentTimeMillis()
     }
 
     def "Update cache, add new value"() {

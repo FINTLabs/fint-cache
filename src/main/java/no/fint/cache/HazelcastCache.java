@@ -14,7 +14,7 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     private final HazelcastCacheManager<T> manager;
     private final String key;
 
-    public HazelcastCache(HazelcastCacheManager<T> manager, String key) {
+    HazelcastCache(HazelcastCacheManager<T> manager, String key) {
         this.manager = manager;
         this.key = key;
     }

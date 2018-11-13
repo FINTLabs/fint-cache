@@ -61,6 +61,11 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     }
 
     @Override
+    public int size() {
+        return datastore.size();
+    }
+
+    @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
         return datastore.stream().filter(i -> predicate.test(i.getObject()));
     }

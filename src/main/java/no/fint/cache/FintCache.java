@@ -118,6 +118,11 @@ public class FintCache<T extends Serializable> implements Cache<T> {
     }
 
     @Override
+    public int size() {
+        return cacheMetaData.getCacheCount();
+    }
+
+    @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
         return cacheObjectList.stream().filter(o -> predicate.test(o.getObject()));
     }

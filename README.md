@@ -1,7 +1,8 @@
 # FINT Cache
 
-[![Build Status](https://travis-ci.org/FINTlibs/fint-cache.svg?branch=master)](https://travis-ci.org/FINTlibs/fint-cache) 
+[![Build Status](https://jenkins.fintlabs.no/buildStatus/icon?job=FINTlibs/fint-cache/master)](https://jenkins.fintlabs.no/job/FINTlibs/fint-cache/master)
 [![Coverage Status](https://coveralls.io/repos/github/FINTlibs/fint-cache/badge.svg?branch=master)](https://coveralls.io/github/FINTlibs/fint-cache?branch=master)
+[![Download](https://api.bintray.com/packages/fint/maven/fint-cache/images/download.svg) ](https://bintray.com/fint/maven/fint-cache/_latestVersion)
 
 ## Installation
 ```groovy

@@ -1,12 +1,10 @@
 package no.fint.cache.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import no.fint.cache.CacheService;
 import no.fint.cache.testutils.TestAction;
 import no.fint.event.model.Event;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -22,9 +20,9 @@ public class TestCacheService extends CacheService<String> {
         return super.getOne(orgId, (value) -> value.equals(id));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onAction(Event event) {
-        update(event, new TypeReference<List<String>>() {
-        });
+        update(event.getOrgId(), event.getData());
     }
 }

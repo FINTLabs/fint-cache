@@ -31,6 +31,7 @@ dependencies {
     compile('no.fint:fint-hazelcast:1.1.1')
 
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile('org.aspectj:aspectjweaver:1.9.2')
     compile("org.projectlombok:lombok:${lombokVersion}")
     compile('commons-codec:commons-codec:1.11')
     compile('com.google.guava:guava:24.1-jre')

@@ -6,8 +6,10 @@ import no.fint.cache.HazelcastCacheManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
+@EnableScheduling
 public class FintCacheConfig {
 
     @Value("${fint.cache.manager:default}")
@@ -22,5 +24,4 @@ public class FintCacheConfig {
                 return new FintCacheManager<>();
         }
     }
-
 }

@@ -40,6 +40,7 @@ dependencies {
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("org.spockframework:spock-spring:${spockSpringVersion}")
     testCompile("org.spockframework:spock-core:${spockSpringVersion}")
+    testCompile('com.github.spock.spring.utils:spock-spring-utils:1.0.0')
 }
 
 task wrapper(type: Wrapper) {

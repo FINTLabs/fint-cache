@@ -1,6 +1,6 @@
 package no.fint.cache.monitoring
 
-import com.github.spock.spring.utils.MockMvcSpecification
+import no.fint.test.utils.MockMvcSpecification
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 

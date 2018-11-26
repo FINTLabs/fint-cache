@@ -28,13 +28,13 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
             return;
         }
         datastore.clear();
-        objects.parallelStream().map(CacheObject::new).forEach(datastore::add);
+        objects.stream().map(CacheObject::new).forEach(datastore::add);
     }
 
     @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newItems = getMap(objects);
-        List<CacheObject<T>> updatedItems = datastore.parallelStream().filter(e -> newItems.containsKey(e.getChecksum())).collect(Collectors.toList());
+        List<CacheObject<T>> updatedItems = datastore.stream().filter(e -> newItems.containsKey(e.getChecksum())).collect(Collectors.toList());
 
         datastore.removeAll(updatedItems);
         datastore.addAll(newItems.values());
@@ -47,17 +47,17 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> get() {
-        return datastore.parallelStream();
+        return datastore.stream();
     }
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return datastore.parallelStream().filter(i -> i.getLastUpdated() > timestamp);
+        return datastore.stream().filter(i -> i.getLastUpdated() > timestamp);
     }
 
     @Override
     public long getLastUpdated() {
-        return datastore.parallelStream().mapToLong(CacheObject::getLastUpdated).max().orElse(0L);
+        return datastore.stream().mapToLong(CacheObject::getLastUpdated).max().orElse(0L);
     }
 
     @Override
@@ -66,6 +66,6 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> items) {
-        return items.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
+        return items.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
     }
 }

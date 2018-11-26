@@ -17,11 +17,17 @@ public final class CacheObject<T extends Serializable> implements Serializable {
     private final byte[] checksum;
     private final long lastUpdated;
     private final T object;
+    private final int[] hashCodes;
 
     public CacheObject(T obj) {
+        this(obj, new int[0]);
+    }
+
+    public CacheObject(T obj, int[] hashes) {
         object = obj;
         lastUpdated = System.currentTimeMillis();
         checksum = DigestUtils.sha1(SerializationUtils.serialize(object));
+        hashCodes = hashes;
     }
 
     public String getChecksum() {

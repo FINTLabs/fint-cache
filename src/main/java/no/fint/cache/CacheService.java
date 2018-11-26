@@ -97,6 +97,14 @@ public abstract class CacheService<T extends Serializable> {
         return Optional.empty();
     }
 
+    public Optional<T> getOne(String orgId, int hashCode, Predicate<T> idFunction) {
+        Optional<Cache<T>> cache = getCache(orgId);
+        if (cache.isPresent()) {
+            return cache.get().filter(hashCode, idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
+        }
+        return Optional.empty();
+    }
+
     public void update(String orgId, List<T> objects) {
         Optional<Cache<T>> cache = getCache(orgId);
         cache.ifPresent(c -> c.update(objects));
@@ -132,5 +140,4 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public abstract void onAction(Event event);
-
 }

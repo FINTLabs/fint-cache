@@ -57,9 +57,9 @@ public class FintCache<T extends Serializable> implements Cache<T> {
     @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newObjects = getMap(objects);
-        Set<CacheObject<T>> cachObjectListCopy = new HashSet<>(cacheObjectList);
-        cachObjectListCopy.addAll(newObjects.values());
-        cacheObjectList = cachObjectListCopy;
+        Set<CacheObject<T>> cacheObjectListCopy = new HashSet<>(cacheObjectList);
+        cacheObjectListCopy.addAll(newObjects.values());
+        cacheObjectList = cacheObjectListCopy;
         updateMetaData();
     }
 

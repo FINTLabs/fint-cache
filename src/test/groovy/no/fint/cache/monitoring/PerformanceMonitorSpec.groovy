@@ -25,6 +25,6 @@ class PerformanceMonitorSpec extends Specification {
         measurement.count() == 1
         measurement.max()
         measurement.min()
-        measurement.average()
+        measurement.mean()
     }
 }

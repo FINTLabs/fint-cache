@@ -7,6 +7,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 class PerformanceMonitor {
 
     @Getter
-    private final ConcurrentHashMap<String, Measurement> measurements = new ConcurrentHashMap<>();
+    private final Map<String, Measurement> measurements = new ConcurrentHashMap<>();
 
     @Around("execution(* no.fint.cache.CacheService+.*(..))")
     public Object monitor(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -23,10 +25,16 @@ class PerformanceMonitor {
         try {
             return joinPoint.proceed();
         } finally {
-            measurements
-                    .computeIfAbsent(getKey(joinPoint), k -> new Measurement())
-                    .add(stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+            measure(getKey(joinPoint), stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
         }
+    }
+
+    private void measure(String key, long elapsed) {
+        measurements
+                .compute(key,
+                        (k, v) -> Objects.isNull(v)
+                                ? new Measurement(elapsed)
+                                : v.add(elapsed));
     }
 
     private String getKey(ProceedingJoinPoint proceedingJoinPoint) {

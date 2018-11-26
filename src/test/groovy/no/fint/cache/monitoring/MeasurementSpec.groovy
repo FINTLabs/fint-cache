@@ -1,17 +1,14 @@
 package no.fint.cache.monitoring
 
+import com.google.common.math.StatsAccumulator
 import spock.lang.Specification
 
 class MeasurementSpec extends Specification {
-    private Measurement measurement
-
-    void setup() {
-        measurement = new Measurement()
-    }
-
     def "Add measurements and get count, min, max and average"() {
+        given:
+        def measurement = new Measurement(1)
+
         when:
-        measurement.add(1)
         measurement.add(2)
         measurement.add(3)
 
@@ -19,14 +16,22 @@ class MeasurementSpec extends Specification {
         measurement.count() == 3
         measurement.min() == 1
         measurement.max() == 3
-        measurement.average() == 2
+        measurement.mean() == 2
     }
 
-    def "Calculate average given 0 count return 0"() {
+    def "Compare with StatsAccumulator"() {
+        given:
+        def acc = new StatsAccumulator()
+
         when:
-        def average = measurement.average()
+        acc.add(1)
+        acc.add(2)
+        acc.add(3)
 
         then:
-        average == 0
+        acc.count() == 3
+        acc.min() == 1
+        acc.max() == 3
+        acc.mean() == 2
     }
 }

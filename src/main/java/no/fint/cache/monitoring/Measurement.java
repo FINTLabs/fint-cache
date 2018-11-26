@@ -3,27 +3,49 @@ package no.fint.cache.monitoring;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import lombok.Data;
 
-import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.DoubleAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
 @Data
 class Measurement {
-    private final LongAdder count = new LongAdder();
-    private final LongAccumulator totalTimeUsed = new LongAccumulator(Long::sum, 0L);
-    private final LongAccumulator min = new LongAccumulator(Long::min, Long.MAX_VALUE);
-    private final LongAccumulator max = new LongAccumulator(Long::max, Long.MIN_VALUE);
 
-    public void add(long elapsed) {
+    private final double initial;
+    private final LongAdder count = new LongAdder();
+    private final DoubleAccumulator sum;
+    private final DoubleAccumulator sumSq;
+    private final DoubleAccumulator min;
+    private final DoubleAccumulator max;
+
+    public Measurement(double initial) {
+        this.initial = initial;
+        sum = new DoubleAccumulator((a, b) -> a + (b - initial), 0);
+        sumSq = new DoubleAccumulator((a, b) -> a + (b - initial) * (b - initial), 0);
+        min = new DoubleAccumulator(Double::min, initial);
+        max = new DoubleAccumulator(Double::max, initial);
         count.increment();
-        totalTimeUsed.accumulate(elapsed);
+        sum.accumulate(initial);
+        sumSq.accumulate(initial);
+    }
+
+    public Measurement add(double elapsed) {
+        count.increment();
+        sum.accumulate(elapsed);
+        sumSq.accumulate(elapsed);
         min.accumulate(elapsed);
         max.accumulate(elapsed);
+        return this;
     }
 
     @JsonGetter
-    public long average() {
-        long countSum = count.sum();
-        return (countSum == 0) ? 0 : (totalTimeUsed.get() / countSum);
+    public double mean() {
+        return initial + sum.get() / count.sum();
+    }
+
+    @JsonGetter
+    public double variance() {
+        double sum = this.sum.get();
+        long count = this.count.sum();
+        return (sumSq.get() - sum * sum / count) / (count - 1);
     }
 
     @JsonGetter
@@ -32,12 +54,12 @@ class Measurement {
     }
 
     @JsonGetter
-    public long min() {
+    public double min() {
         return min.get();
     }
 
     @JsonGetter
-    public long max() {
+    public double max() {
         return max.get();
     }
 }

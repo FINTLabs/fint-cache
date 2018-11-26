@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,7 +25,7 @@ public class PerformanceMonitorController {
     }
 
     @GetMapping("/measurements")
-    public ConcurrentMap<String, Measurement> getMeasurements(@RequestParam(value = "key", required = false) String key) {
+    public Map<String, Measurement> getMeasurements(@RequestParam(value = "key", required = false) String key) {
         if (key == null) {
             return performanceMonitor.getMeasurements();
         } else {

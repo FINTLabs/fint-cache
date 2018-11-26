@@ -4,18 +4,17 @@ import no.fint.test.utils.MockMvcSpecification
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
-
 class PerformanceMonitorControllerSpec extends MockMvcSpecification {
     private PerformanceMonitorController controller
     private PerformanceMonitor performanceMonitor
     private MockMvc mockMvc
 
     void setup() {
-        ConcurrentMap<String, Measurement> measurements = new ConcurrentHashMap<String, Measurement>()
-        measurements.put('key1', new Measurement())
-        measurements.put('key2', new Measurement())
+        Map<String, Measurement> measurements = [
+                'key1': new Measurement(1),
+                'key2': new Measurement(2)
+        ]
+
         performanceMonitor = Mock(PerformanceMonitor) {
             getMeasurements() >> measurements
         }
@@ -42,8 +41,8 @@ class PerformanceMonitorControllerSpec extends MockMvcSpecification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$.key1.count').value(equalTo(0)))
-                .andExpect(jsonPath('$.key2.count').value(equalTo(0)))
+                .andExpect(jsonPath('$.key1.count').value(equalTo(1)))
+                .andExpect(jsonPath('$.key2.count').value(equalTo(1)))
     }
 
     def "Get measurements with key containing key1"() {
@@ -52,7 +51,7 @@ class PerformanceMonitorControllerSpec extends MockMvcSpecification {
 
         then:
         response.andExpect(status().isOk())
-                .andExpect(jsonPath('$.key1.count').value(equalTo(0)))
+                .andExpect(jsonPath('$.key1.count').value(equalTo(1)))
                 .andExpect(jsonPath('$.key2').doesNotExist())
     }
 

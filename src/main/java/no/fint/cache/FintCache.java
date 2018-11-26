@@ -75,23 +75,21 @@ public class FintCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> get() {
-        return cacheObjectList.parallelStream();
+        return cacheObjectList.stream();
     }
 
     public List<T> getSourceList() {
-        return cacheObjectList.parallelStream().map(CacheObject::getObject).collect(Collectors.toList());
+        return cacheObjectList.stream().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return cacheObjectList.parallelStream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+        return cacheObjectList.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {
-        return cacheObjectList.parallelStream().filter(cacheObject ->
-                (cacheObject.getLastUpdated() >= timestamp))
-                .collect(Collectors.toList())
-                .parallelStream().map(CacheObject::getObject)
+        return getSince(timestamp)
+                .map(CacheObject::getObject)
                 .collect(Collectors.toList());
     }
 
@@ -101,12 +99,12 @@ public class FintCache<T extends Serializable> implements Cache<T> {
         cacheMetaData.setCacheCount(cacheObjectList.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        cacheObjectList.parallelStream().map(CacheObject::rawChecksum).forEach(digest::update);
+        cacheObjectList.stream().map(CacheObject::rawChecksum).forEach(digest::update);
         cacheMetaData.setChecksum(digest.digest());
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        return list.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
+        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
     }
 
     private void flushMetaData() {

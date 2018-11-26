@@ -8,7 +8,10 @@ import no.fint.cache.model.CacheObject;
 
 import java.io.Serializable;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -57,9 +60,9 @@ public class FintCache<T extends Serializable> implements Cache<T> {
     @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newObjects = getMap(objects);
-        Set<CacheObject<T>> cachObjectListCopy = new HashSet<>(cacheObjectList);
-        cachObjectListCopy.addAll(newObjects.values());
-        cacheObjectList = cachObjectListCopy;
+        Set<CacheObject<T>> cacheObjectListCopy = new HashSet<>(cacheObjectList);
+        cacheObjectListCopy.addAll(newObjects.values());
+        cacheObjectList = cacheObjectListCopy;
         updateMetaData();
     }
 
@@ -72,23 +75,23 @@ public class FintCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> get() {
-        return cacheObjectList.stream();
+        return cacheObjectList.parallelStream();
     }
 
     public List<T> getSourceList() {
-        return cacheObjectList.stream().map(CacheObject::getObject).collect(Collectors.toList());
+        return cacheObjectList.parallelStream().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return cacheObjectList.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+        return cacheObjectList.parallelStream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {
-        return cacheObjectList.stream().filter(cacheObject ->
+        return cacheObjectList.parallelStream().filter(cacheObject ->
                 (cacheObject.getLastUpdated() >= timestamp))
                 .collect(Collectors.toList())
-                .stream().map(CacheObject::getObject)
+                .parallelStream().map(CacheObject::getObject)
                 .collect(Collectors.toList());
     }
 
@@ -98,12 +101,12 @@ public class FintCache<T extends Serializable> implements Cache<T> {
         cacheMetaData.setCacheCount(cacheObjectList.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        cacheObjectList.stream().map(CacheObject::rawChecksum).forEach(digest::update);
+        cacheObjectList.parallelStream().map(CacheObject::rawChecksum).forEach(digest::update);
         cacheMetaData.setChecksum(digest.digest());
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
+        return list.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
     }
 
     private void flushMetaData() {
@@ -119,6 +122,6 @@ public class FintCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return cacheObjectList.stream().filter(o -> predicate.test(o.getObject()));
+        return cacheObjectList.parallelStream().filter(o -> predicate.test(o.getObject()));
     }
 }

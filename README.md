@@ -64,3 +64,14 @@ To add more logging, enable debug log level for FintCache.
 ```properties
 logging.level.no.fint.cache=DEBUG
 ```
+
+
+## Performance monitoring
+
+Performance monitoring for the implementations of `CacheService`.  
+It is disabled by default and can be enabled by setting the following property: `fint.cache.performance-monitor=true`
+
+The output from the performance monitoring will be available at these endpoints:  
+* `GET /performance-monitor/keys` - Lists all keys that are included in the performance monitoring
+* `GET /performance-monitor/measurements?keys=<key-name>` - Lists the measurements. If a key query param is provided, it will only return the measurements containing that text
+* `DELETE /performance-monitor/measurements` - Deletes all measurements

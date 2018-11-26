@@ -103,7 +103,7 @@ public class FintCache<T extends Serializable> implements Cache<T> {
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
+        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a,b)->b));
     }
 
     private void flushMetaData() {

@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -32,36 +33,60 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             log.debug("Empty list sent in, will not update cache");
         } else {
             Map<String, CacheObject<T>> cacheObjectMap = getMap(objects);
-            if (cacheObjects.isEmpty()) {
-                log.debug("Empty cache, adding all values");
-                cacheObjects = ImmutableSet.copyOf(cacheObjectMap.values());
-            } else {
-                Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
-                cacheObjects.forEach(cacheObject -> {
-                    String checksum = cacheObject.getChecksum();
-                    if (cacheObjectMap.containsKey(checksum)) {
-                        cacheObjectMap.remove(checksum);
-                    } else {
-                        log.debug("Adding new object to the cache (checksum: {})", cacheObject.getChecksum());
-                        cacheObjectsCopy.remove(cacheObject);
-                    }
-                });
+            updateInternal(cacheObjectMap);
+        }
+    }
 
-                cacheObjectsCopy.addAll(cacheObjectMap.values());
-                cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
-            }
+    private void updateInternal(Map<String, CacheObject<T>> cacheObjectMap) {
+        if (cacheObjects.isEmpty()) {
+            log.debug("Empty cache, adding all values");
+            cacheObjects = ImmutableSet.copyOf(cacheObjectMap.values());
+        } else {
+            Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
+            cacheObjects.forEach(cacheObject -> {
+                String checksum = cacheObject.getChecksum();
+                if (cacheObjectMap.containsKey(checksum)) {
+                    cacheObjectMap.remove(checksum);
+                } else {
+                    log.debug("Adding new object to the cache (checksum: {})", cacheObject.getChecksum());
+                    cacheObjectsCopy.remove(cacheObject);
+                }
+            });
 
-            updateMetaData();
+            cacheObjectsCopy.addAll(cacheObjectMap.values());
+            cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
+        }
+
+        updateMetaData();
+    }
+
+    @Override
+    public void updateCache(List<CacheObject<T>> objects) {
+        if (objects.isEmpty()) {
+            log.debug("Empty list sent in, will not update cache");
+        } else {
+            Map<String, CacheObject<T>> cacheObjectMap = getCacheMap(objects);
+            updateInternal(cacheObjectMap);
         }
     }
 
     @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newObjects = getMap(objects);
+        addInternal(newObjects);
+    }
+
+    private void addInternal(Map<String, CacheObject<T>> newObjects) {
         Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
         cacheObjectsCopy.addAll(newObjects.values());
         cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
         updateMetaData();
+    }
+
+    @Override
+    public void addCache(List<CacheObject<T>> objects) {
+        Map<String, CacheObject<T>> newObjects = getCacheMap(objects);
+        addInternal(newObjects);
     }
 
 
@@ -107,6 +132,10 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 
+    private Map<String, CacheObject<T>> getCacheMap(List<CacheObject<T>> list) {
+        return list.stream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a,b)->b));
+    }
+
     private void flushMetaData() {
         cacheMetaData.setCacheCount(0);
         cacheMetaData.setLastUpdated(0);
@@ -125,6 +154,14 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return cacheObjects.stream().filter(o -> predicate.test(o.getObject()));
+        return cacheObjects.parallelStream().filter(o -> predicate.test(o.getObject()));
+    }
+
+    @Override
+    public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
+        return cacheObjects
+                .parallelStream()
+                .filter(o -> Arrays.asList(o.getHashCodes()).contains(hashCode))
+                .filter(o -> predicate.test(o.getObject()));
     }
 }

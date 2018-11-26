@@ -41,6 +41,7 @@ dependencies {
     testCompile("org.spockframework:spock-spring:${spockSpringVersion}")
     testCompile("org.spockframework:spock-core:${spockSpringVersion}")
     testCompile('no.fint:fint-test-utils:0.0.4')
+    testCompile('org.apache.commons:commons-math3:3.6.1')
 }
 
 task wrapper(type: Wrapper) {

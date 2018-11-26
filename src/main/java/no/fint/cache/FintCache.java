@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -31,36 +32,60 @@ public class FintCache<T extends Serializable> implements Cache<T> {
             log.debug("Empty list sent in, will not update cache");
         } else {
             Map<String, CacheObject<T>> cacheObjectMap = getMap(objects);
-            if (cacheObjectList.isEmpty()) {
-                log.debug("Empty cache, adding all values");
-                cacheObjectList.addAll(cacheObjectMap.values());
-            } else {
-                Set<CacheObject<T>> cacheObjectListCopy = new HashSet<>(cacheObjectList);
-                cacheObjectList.forEach(cacheObject -> {
-                    String checksum = cacheObject.getChecksum();
-                    if (cacheObjectMap.containsKey(checksum)) {
-                        cacheObjectMap.remove(checksum);
-                    } else {
-                        log.debug("Adding new object to the cache (checksum: {})", cacheObject.getChecksum());
-                        cacheObjectListCopy.remove(cacheObject);
-                    }
-                });
+            updateInternal(cacheObjectMap);
+        }
+    }
 
-                cacheObjectListCopy.addAll(cacheObjectMap.values());
-                cacheObjectList = cacheObjectListCopy;
-            }
+    private void updateInternal(Map<String, CacheObject<T>> cacheObjectMap) {
+        if (cacheObjectList.isEmpty()) {
+            log.debug("Empty cache, adding all values");
+            cacheObjectList.addAll(cacheObjectMap.values());
+        } else {
+            Set<CacheObject<T>> cacheObjectListCopy = new HashSet<>(cacheObjectList);
+            cacheObjectList.forEach(cacheObject -> {
+                String checksum = cacheObject.getChecksum();
+                if (cacheObjectMap.containsKey(checksum)) {
+                    cacheObjectMap.remove(checksum);
+                } else {
+                    log.debug("Adding new object to the cache (checksum: {})", cacheObject.getChecksum());
+                    cacheObjectListCopy.remove(cacheObject);
+                }
+            });
 
-            updateMetaData();
+            cacheObjectListCopy.addAll(cacheObjectMap.values());
+            cacheObjectList = cacheObjectListCopy;
+        }
+
+        updateMetaData();
+    }
+
+    @Override
+    public void updateCache(List<CacheObject<T>> objects) {
+        if (objects.isEmpty()) {
+            log.debug("Empty list sent in, will not update cache");
+        } else {
+            Map<String, CacheObject<T>> cacheObjectMap = getCacheMap(objects);
+            updateInternal(cacheObjectMap);
         }
     }
 
     @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newObjects = getMap(objects);
+        addInternal(newObjects);
+    }
+
+    private void addInternal(Map<String, CacheObject<T>> newObjects) {
         Set<CacheObject<T>> cachObjectListCopy = new HashSet<>(cacheObjectList);
         cachObjectListCopy.addAll(newObjects.values());
         cacheObjectList = cachObjectListCopy;
         updateMetaData();
+    }
+
+    @Override
+    public void addCache(List<CacheObject<T>> objects) {
+        Map<String, CacheObject<T>> newObjects = getCacheMap(objects);
+        addInternal(newObjects);
     }
 
 
@@ -106,6 +131,10 @@ public class FintCache<T extends Serializable> implements Cache<T> {
         return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a,b)->b));
     }
 
+    private Map<String, CacheObject<T>> getCacheMap(List<CacheObject<T>> list) {
+        return list.stream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a,b)->b));
+    }
+
     private void flushMetaData() {
         cacheMetaData.setCacheCount(0);
         cacheMetaData.setLastUpdated(0);
@@ -119,6 +148,14 @@ public class FintCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return cacheObjectList.stream().filter(o -> predicate.test(o.getObject()));
+        return cacheObjectList.parallelStream().filter(o -> predicate.test(o.getObject()));
+    }
+
+    @Override
+    public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
+        return cacheObjectList
+                .parallelStream()
+                .filter(o -> Arrays.asList(o.getHashCodes()).contains(hashCode))
+                .filter(o -> predicate.test(o.getObject()));
     }
 }

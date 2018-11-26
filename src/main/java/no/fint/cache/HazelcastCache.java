@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheObject;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -32,8 +33,27 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     }
 
     @Override
+    public void updateCache(List<CacheObject<T>> objects) {
+        if (objects.isEmpty()) {
+            log.debug("Empty list sent in, will not update cache");
+            return;
+        }
+        datastore.clear();
+        objects.forEach(datastore::add);
+    }
+
+    @Override
     public void add(List<T> objects) {
         Map<String, CacheObject<T>> newItems = getMap(objects);
+        List<CacheObject<T>> updatedItems = datastore.stream().filter(e -> newItems.containsKey(e.getChecksum())).collect(Collectors.toList());
+
+        datastore.removeAll(updatedItems);
+        datastore.addAll(newItems.values());
+    }
+
+    @Override
+    public void addCache(List<CacheObject<T>> objects) {
+        Map<String, CacheObject<T>> newItems = getCacheMap(objects);
         List<CacheObject<T>> updatedItems = datastore.stream().filter(e -> newItems.containsKey(e.getChecksum())).collect(Collectors.toList());
 
         datastore.removeAll(updatedItems);
@@ -62,10 +82,22 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return datastore.stream().filter(i -> predicate.test(i.getObject()));
+        return datastore.parallelStream().filter(i -> predicate.test(i.getObject()));
+    }
+
+    @Override
+    public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
+        return datastore
+                .parallelStream()
+                .filter(i -> Arrays.asList(i.getHashCodes()).contains(hashCode))
+                .filter(i -> predicate.test(i.getObject()));
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> items) {
-        return items.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity()));
+        return items.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
+    }
+
+    private Map<String, CacheObject<T>> getCacheMap(List<CacheObject<T>> items) {
+        return items.stream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 }

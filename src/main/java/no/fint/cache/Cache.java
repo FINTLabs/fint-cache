@@ -10,7 +10,11 @@ import java.util.stream.Stream;
 public interface Cache<T extends Serializable> {
     void update(List<T> objects);
 
+    void updateCache(List<CacheObject<T>> objects);
+
     void add(List<T> objects);
+
+    void addCache(List<CacheObject<T>> objects);
 
     void flush();
 
@@ -21,4 +25,6 @@ public interface Cache<T extends Serializable> {
     long getLastUpdated();
 
     Stream<CacheObject<T>> filter(Predicate<T> predicate);
+
+    Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate);
 }

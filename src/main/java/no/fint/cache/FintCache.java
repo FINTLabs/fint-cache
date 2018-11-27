@@ -8,11 +8,13 @@ import no.fint.cache.model.CacheObject;
 
 import java.io.Serializable;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -148,14 +150,21 @@ public class FintCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return cacheObjectList.parallelStream().filter(o -> predicate.test(o.getObject()));
+        return cacheObjectList.stream().filter(o -> predicate.test(o.getObject()));
     }
 
     @Override
     public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
         return cacheObjectList
-                .parallelStream()
-                .filter(o -> Arrays.asList(o.getHashCodes()).contains(hashCode))
+                .stream()
+                .filter(o -> {
+                    for (int i = 0; i < o.getHashCodes().length; i++) {
+                         if (o.getHashCodes()[i] == hashCode) {
+                             return true;
+                         }
+                    }
+                    return false;
+                })
                 .filter(o -> predicate.test(o.getObject()));
     }
 }

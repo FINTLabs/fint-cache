@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public class FintCache<T extends Serializable> implements Cache<T> {
+public class FintCache<T extends Serializable> implements Cache<T>, Serializable {
     @Getter
     private CacheMetaData cacheMetaData;
     private Set<CacheObject<T>> cacheObjectList;

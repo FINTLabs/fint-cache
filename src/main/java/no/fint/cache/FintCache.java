@@ -8,7 +8,10 @@ import no.fint.cache.model.CacheObject;
 
 import java.io.Serializable;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -85,10 +88,10 @@ public class FintCache<T extends Serializable> implements Cache<T> {
     }
 
     public List<?> getSourceListSince(long timestamp) {
-        return cacheObjectList.stream().filter(cacheObject ->
-                (cacheObject.getLastUpdated() >= timestamp))
-                .collect(Collectors.toList())
-                .stream().map(CacheObject::getObject)
+        return cacheObjectList
+                .stream()
+                .filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp))
+                .map(CacheObject::getObject)
                 .collect(Collectors.toList());
     }
 
@@ -103,7 +106,7 @@ public class FintCache<T extends Serializable> implements Cache<T> {
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a,b)->b));
+        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 
     private void flushMetaData() {

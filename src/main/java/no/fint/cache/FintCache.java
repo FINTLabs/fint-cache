@@ -6,6 +6,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheMetaData;
 import no.fint.cache.model.CacheObject;
+import no.fint.cache.model.Index;
+import no.fint.cache.model.SingleIndex;
 
 import java.io.Serializable;
 import java.security.MessageDigest;
@@ -20,11 +22,12 @@ import java.util.stream.Stream;
 public class FintCache<T extends Serializable> implements Cache<T>, Serializable {
     @Getter
     private CacheMetaData cacheMetaData;
-    private Set<CacheObject<T>> cacheObjects;
+    private List<CacheObject<T>> cacheObjects;
+    private Map<Integer, Index> index;
 
     public FintCache() {
         cacheMetaData = new CacheMetaData();
-        cacheObjects = Collections.emptySet();
+        cacheObjects = Collections.emptyList();
     }
 
     @Override
@@ -42,7 +45,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             log.debug("Empty cache, adding all values");
             cacheObjects = ImmutableSet.copyOf(cacheObjectMap.values());
         } else {
-            Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
+            List<CacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
             cacheObjects.forEach(cacheObject -> {
                 String checksum = cacheObject.getChecksum();
                 if (cacheObjectMap.containsKey(checksum)) {
@@ -65,6 +68,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         if (objects.isEmpty()) {
             log.debug("Empty list sent in, will not update cache");
         } else {
+            index = Collections.emptyMap();
             Map<String, CacheObject<T>> cacheObjectMap = getCacheMap(objects);
             updateInternal(cacheObjectMap);
         }
@@ -77,7 +81,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     private void addInternal(Map<String, CacheObject<T>> newObjects) {
-        Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
+        List<CacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
         cacheObjectsCopy.addAll(newObjects.values());
         cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
         updateMetaData();
@@ -121,11 +125,24 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @SneakyThrows
     private void updateMetaData() {
+        Map<Integer, Index> newIndex = new HashMap<>();
         cacheMetaData.setCacheCount(cacheObjects.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        cacheObjects.stream().map(CacheObject::rawChecksum).forEach(digest::update);
+        ListIterator<CacheObject<T>> iterator = cacheObjectList.listIterator();
+        while (iterator.hasNext()) {
+            int i = iterator.nextIndex();
+            CacheObject<T> it = iterator.next();
+            digest.update(it.rawChecksum());
+            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, (k,v) -> {
+                if (v == null) {
+                    return new SingleIndex(i);
+                }
+                return v.add(i);
+            }));
+        }
         cacheMetaData.setChecksum(digest.digest());
+        index = newIndex;
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
@@ -133,7 +150,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     private Map<String, CacheObject<T>> getCacheMap(List<CacheObject<T>> list) {
-        return list.stream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a,b)->b));
+        return list.stream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 
     private void flushMetaData() {
@@ -159,9 +176,12 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
-        return cacheObjects
-                .parallelStream()
-                .filter(o -> Arrays.asList(o.getHashCodes()).contains(hashCode))
+        if (!index.containsKey(hashCode)) {
+            return filter(predicate);
+        }
+        return index.get(hashCode)
+                .stream()
+                .mapToObj(cacheObjects::get)
                 .filter(o -> predicate.test(o.getObject()));
     }
 }

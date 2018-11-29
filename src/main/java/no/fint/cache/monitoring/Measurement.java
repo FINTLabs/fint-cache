@@ -1,12 +1,10 @@
 package no.fint.cache.monitoring;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import lombok.Data;
 
 import java.util.concurrent.atomic.DoubleAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
-@Data
 class Measurement {
 
     private final double initial;

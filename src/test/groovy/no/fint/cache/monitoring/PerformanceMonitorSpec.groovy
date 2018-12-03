@@ -17,14 +17,18 @@ class PerformanceMonitorSpec extends Specification {
     def "Performance monitor"() {
         when:
         testCacheService.add('rogfk.no', new ArrayList<String>())
+        testCacheService.add('rogfk.no', new ArrayList<String>())
         def measurements = performanceMonitor.getMeasurements()
         def measurement = measurements["${TestCacheService.class.getName()}.add"]
 
         then:
         measurements.size() == 1
-        measurement.count() == 1
-        measurement.max()
-        measurement.min()
-        measurement.mean()
+        measurement.count() == 2
+
+        when:
+        performanceMonitor.clearMeasurements()
+
+        then:
+        performanceMonitor.measurements.isEmpty()
     }
 }

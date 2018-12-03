@@ -27,10 +27,11 @@ class HazelcastCacheIntegrationSpec extends Specification {
     def "Create cache"() {
         when:
         def cache = testCacheService.createCache('rogfk.no')
+        testCacheService.remove('rogfk.no')
 
         then:
-        testCacheService.remove('rogfk.no')
         cache != null
+        cache.size() == 0
         testCacheService.getAll('rogfk.no').size() == 0
     }
 

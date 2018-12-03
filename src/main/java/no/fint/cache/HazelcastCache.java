@@ -57,7 +57,7 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public int size() {
-        return datastore.size();
+        return manager.getCacheInternal(key).size();
     }
 
     @Override

@@ -7,9 +7,6 @@ pipeline {
     }
     stages {
         stage('Build') {
-            environment {
-                COVERALLS_REPO_TOKEN = 'upY6ITrrYihwYk9AuNHheu6XGkL8eQJP2'
-            }
             steps {
                 sh 'gradle --no-daemon clean build jacocoTestReport coveralls'
             }

@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'gradle --no-daemon clean build jacocoTestReport coveralls'
+                sh 'gradle --no-daemon clean build'
             }
         }
         stage('Deploy PR') {

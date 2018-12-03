@@ -1,5 +1,6 @@
 package no.fint.cache;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             Map<String, CacheObject<T>> cacheObjectMap = getMap(objects);
             if (cacheObjects.isEmpty()) {
                 log.debug("Empty cache, adding all values");
-                cacheObjects = new HashSet<>(cacheObjectMap.values());
+                cacheObjects = ImmutableSet.copyOf(cacheObjectMap.values());
             } else {
                 Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
                 cacheObjects.forEach(cacheObject -> {
@@ -47,7 +48,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
                 });
 
                 cacheObjectsCopy.addAll(cacheObjectMap.values());
-                cacheObjects = cacheObjectsCopy;
+                cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
             }
 
             updateMetaData();
@@ -59,7 +60,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         Map<String, CacheObject<T>> newObjects = getMap(objects);
         Set<CacheObject<T>> cacheObjectsCopy = new HashSet<>(cacheObjects);
         cacheObjectsCopy.addAll(newObjects.values());
-        cacheObjects = cacheObjectsCopy;
+        cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
         updateMetaData();
     }
 

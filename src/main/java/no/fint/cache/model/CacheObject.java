@@ -13,10 +13,10 @@ import java.io.Serializable;
 @Getter
 @EqualsAndHashCode(of = "checksum")
 @ToString
-public class CacheObject<T extends Serializable> implements Serializable {
-    private byte[] checksum;
-    private long lastUpdated;
-    private T object;
+public final class CacheObject<T extends Serializable> implements Serializable {
+    private final byte[] checksum;
+    private final long lastUpdated;
+    private final T object;
 
     public CacheObject(T obj) {
         object = obj;

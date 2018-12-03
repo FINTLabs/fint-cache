@@ -1,10 +1,8 @@
 package no.fint.cache;
 
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IList;
-import com.hazelcast.core.ISet;
+import com.hazelcast.core.IMap;
 import lombok.extern.slf4j.Slf4j;
-import no.fint.cache.model.CacheObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -18,28 +16,34 @@ public class HazelcastCacheManager<T extends Serializable> implements CacheManag
     @Autowired
     private HazelcastInstance hazelcast;
 
-    private ISet<String> caches;
+    private IMap<String, Cache<T>> caches;
 
     @Override
     public Optional<Cache<T>> getCache(String key) {
-        if (caches.contains(key)) {
-            return Optional.of(new HazelcastCache<T>(hazelcast.getList(key)));
+        if (caches.containsKey(key)) {
+            return Optional.of(new HazelcastCache<T>(this, key));
         }
         return Optional.empty();
     }
 
+    Cache<T> getCacheInternal(String key) {
+        return caches.getOrDefault(key, new FintCache<>());
+    }
+
     @Override
     public Cache<T> createCache(String key) {
-        IList<CacheObject<T>> cacheObjects = hazelcast.getList(key);
-        log.info("Created cache {} on service {}", cacheObjects.getName(), cacheObjects.getServiceName());
-        caches.add(key);
-        return new HazelcastCache<>(cacheObjects);
+        FintCache<T> result = new FintCache<>();
+        caches.put(key, result);
+        return result;
     }
 
     @Override
     public void remove(String key) {
-        hazelcast.getList(key).destroy();
         caches.remove(key);
+    }
+
+    void replace(String key, Cache<T> replacement) {
+        caches.put(key, replacement);
     }
 
     @Override
@@ -49,12 +53,12 @@ public class HazelcastCacheManager<T extends Serializable> implements CacheManag
 
     @Override
     public Set<String> getKeys() {
-        return caches;
+        return caches.keySet();
     }
 
     @PostConstruct
     public void init() {
-        caches = hazelcast.getSet("fint-caches");
-        log.info("Connected to Hazelcast {} with service name {}", hazelcast.getName(), caches.getServiceName());
+        caches = hazelcast.getMap("fint-caches");
+        log.info("Connected to Hazelcast {} with service name {}, {} caches", hazelcast.getName(), caches.getServiceName(), caches.size());
     }
 }

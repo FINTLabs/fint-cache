@@ -93,6 +93,7 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         lastUpdated <= System.currentTimeMillis()
+        lastUpdated > 0L
     }
 
     def "Update cache, add new value"() {

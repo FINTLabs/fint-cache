@@ -128,9 +128,9 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public boolean supportsAction(String action) {
-        List<String> stringActions = actions.stream().map(Enum::name).collect(Collectors.toList());
-        return stringActions.contains(action);
+        return actions.stream().map(Enum::name).anyMatch(action::equals);
     }
 
     public abstract void onAction(Event event);
+
 }

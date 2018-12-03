@@ -22,5 +22,4 @@ public class FintCacheConfig {
                 return new FintCacheManager<>();
         }
     }
-
 }

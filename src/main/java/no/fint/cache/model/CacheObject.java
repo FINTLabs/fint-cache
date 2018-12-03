@@ -24,12 +24,6 @@ public final class CacheObject<T extends Serializable> implements Serializable {
         checksum = DigestUtils.sha1(SerializationUtils.serialize(object));
     }
 
-    CacheObject(T obj, long timestamp) {
-        object = obj;
-        lastUpdated = timestamp;
-        checksum = DigestUtils.sha1(SerializationUtils.serialize(object));
-    }
-
     public String getChecksum() {
         return Hex.encodeHexString(checksum);
     }

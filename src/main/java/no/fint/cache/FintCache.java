@@ -1,6 +1,6 @@
 package no.fint.cache;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     private void updateInternal(Map<String, CacheObject<T>> cacheObjectMap) {
         if (cacheObjects.isEmpty()) {
             log.debug("Empty cache, adding all values");
-            cacheObjects = ImmutableSet.copyOf(cacheObjectMap.values());
+            cacheObjects = ImmutableList.copyOf(cacheObjectMap.values());
         } else {
             List<CacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
             cacheObjects.forEach(cacheObject -> {
@@ -57,7 +57,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             });
 
             cacheObjectsCopy.addAll(cacheObjectMap.values());
-            cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
+            cacheObjects = ImmutableList.copyOf(cacheObjectsCopy);
         }
 
         updateMetaData();
@@ -83,7 +83,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     private void addInternal(Map<String, CacheObject<T>> newObjects) {
         List<CacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
         cacheObjectsCopy.addAll(newObjects.values());
-        cacheObjects = ImmutableSet.copyOf(cacheObjectsCopy);
+        cacheObjects = ImmutableList.copyOf(cacheObjectsCopy);
         updateMetaData();
     }
 
@@ -97,7 +97,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     @Override
     public void flush() {
         flushMetaData();
-        cacheObjects = Collections.emptySet();
+        cacheObjects = Collections.emptyList();
     }
 
     @Override
@@ -129,7 +129,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         cacheMetaData.setCacheCount(cacheObjects.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        ListIterator<CacheObject<T>> iterator = cacheObjectList.listIterator();
+        ListIterator<CacheObject<T>> iterator = cacheObjects.listIterator();
         while (iterator.hasNext()) {
             int i = iterator.nextIndex();
             CacheObject<T> it = iterator.next();

@@ -63,13 +63,13 @@ class HazelcastCacheIntegrationSpec extends Specification {
         values.size() == 3
     }
 
-    def "Add existing items to cache"() {
+    def "Adding existing item to cache adds duplicate"() {
         when:
         testCacheService.add('rogfk.no', ['test2', 'test3'])
         def values = testCacheService.getAll('rogfk.no')
 
         then:
-        values.size() == 3
+        values.size() == 4
     }
 
     def "Get all values since timestamp"() {

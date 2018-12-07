@@ -60,6 +60,15 @@ class FintCacheIntegrationSpec extends Specification {
         values.size() == 3
     }
 
+    def "Adding existing item to cache adds duplicate"() {
+        when:
+        testCacheService.add('rogfk.no', ['test2', 'test3'])
+        def values = testCacheService.getAll('rogfk.no')
+
+        then:
+        values.size() == 4
+    }
+
     def "Get all values since timestamp"() {
         when:
         def values = testCacheService.getAll('rogfk.no', System.currentTimeMillis() - 500)

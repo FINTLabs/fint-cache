@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Optional.*;
+
 @Slf4j
 public class HazelcastCacheManager<T extends Serializable> implements CacheManager<T> {
 
@@ -21,9 +23,9 @@ public class HazelcastCacheManager<T extends Serializable> implements CacheManag
     @Override
     public Optional<Cache<T>> getCache(String key) {
         if (caches.containsKey(key)) {
-            return Optional.of(new HazelcastCache<T>(this, key));
+            return of(new HazelcastCache<>(this, key));
         }
-        return Optional.empty();
+        return empty();
     }
 
     Cache<T> getCacheInternal(String key) {
@@ -32,9 +34,8 @@ public class HazelcastCacheManager<T extends Serializable> implements CacheManag
 
     @Override
     public Cache<T> createCache(String key) {
-        FintCache<T> result = new FintCache<>();
-        caches.put(key, result);
-        return result;
+        ofNullable(caches.put(key, new FintCache<>())).ifPresent(Cache::flush);
+        return new HazelcastCache<>(this, key);
     }
 
     @Override

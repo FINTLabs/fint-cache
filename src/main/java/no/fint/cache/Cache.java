@@ -20,5 +20,7 @@ public interface Cache<T extends Serializable> {
 
     long getLastUpdated();
 
+    int size();
+
     Stream<CacheObject<T>> filter(Predicate<T> predicate);
 }

@@ -17,7 +17,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         then:
-        defaultCache.cacheMetaData.cacheCount == 1
+        defaultCache.size() == 1
     }
 
     def "Update cache, add new object"() {
@@ -34,7 +34,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         then:
-        defaultCache.cacheMetaData.cacheCount == 2
+        defaultCache.size() == 2
     }
 
     def "Update cache, remove existing object"() {
@@ -53,7 +53,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         then:
-        defaultCache.cacheMetaData.cacheCount == 2
+        defaultCache.size() == 2
     }
 
     def "Update cache, update content of existing object"() {
@@ -74,7 +74,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         then:
-        defaultCache.cacheMetaData.cacheCount == 3
+        defaultCache.size() == 3
     }
 
     def "Update cache, existing content and empty update"() {
@@ -88,7 +88,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update([])
 
         then:
-        defaultCache.cacheMetaData.cacheCount == 1
+        defaultCache.size() == 1
     }
 
     def "Flush cache"() {
@@ -102,7 +102,7 @@ class FintCacheSpec extends Specification {
         defaultCache.flush()
 
         then:
-        defaultCache.cacheMetaData.cacheCount == 0
+        defaultCache.size() == 0
         defaultCache.cacheMetaData.lastUpdated == 0
         defaultCache.cacheMetaData.checksum == null
     }

@@ -127,6 +127,11 @@ public abstract class CacheService<T extends Serializable> {
         cache.ifPresent(c -> c.add(objects));
     }
 
+    public void addCache(String orgId, List<CacheObject<T>> objects) {
+        Optional<Cache<T>> cache = getCache(orgId);
+        cache.ifPresent(c -> c.addCache(objects));
+    }
+
     public void flush(String orgId) {
         Optional<Cache<T>> cache = getCache(orgId);
         cache.ifPresent(Cache::flush);

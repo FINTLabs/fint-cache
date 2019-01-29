@@ -28,6 +28,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     public FintCache() {
         cacheMetaData = new CacheMetaData();
         cacheObjects = Collections.emptyList();
+        index = Collections.emptyMap();
     }
 
     @Override

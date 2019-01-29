@@ -25,4 +25,9 @@ public class TestCacheService extends CacheService<String> {
     public void onAction(Event event) {
         update(event.getOrgId(), event.getData());
     }
+
+    @Override
+    public void populateCache(String orgId) {
+        
+    }
 }

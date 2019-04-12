@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import no.fint.cache.exceptions.CacheNotFoundException;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.utils.CacheUri;
 import no.fint.event.model.Event;
@@ -62,9 +63,9 @@ public abstract class CacheService<T extends Serializable> {
     public void put(String orgId, Cache<T> cache) {
         createCache(orgId);
     }
-    
+
     public long getLastUpdated(String orgId) {
-        return getCache(orgId).map(Cache::getLastUpdated).orElse(0L);
+        return getCache(orgId).map(Cache::getLastUpdated).orElseThrow(() -> new CacheNotFoundException(orgId));
     }
 
     public Optional<Cache<T>> getCache(String orgId) {
@@ -72,51 +73,38 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public List<T> getAll(String orgId) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        if (cache.isPresent()) {
-            return cache.get().get().map(CacheObject::getObject).collect(Collectors.toList());
-        } else {
-            return Collections.emptyList();
-        }
+        Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
+        return cache.get().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     public List<T> getAll(String orgId, long sinceTimestamp) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        if (cache.isPresent()) {
-            return cache.get().getSince(sinceTimestamp).map(CacheObject::getObject).collect(Collectors.toList());
-        } else {
-            return Collections.emptyList();
-        }
+        Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
+        return cache.getSince(sinceTimestamp).map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     public Optional<T> getOne(String orgId, Predicate<T> idFunction) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        if (cache.isPresent()) {
-            return cache.get().filter(idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
-        }
-        return Optional.empty();
+        Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
+        return cache.filter(idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
     }
 
     public void update(String orgId, List<T> objects) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        cache.ifPresent(c -> c.update(objects));
+        getCache(orgId).ifPresent(c -> c.update(objects));
     }
 
     @Deprecated
     public void update(Event event, TypeReference<List<T>> typeReference) {
-    	log.info("Updating cache for org {} for type {}", event.getOrgId(), typeReference.getType());
+        log.warn("Deprecated method call", new Exception());
+        log.info("Updating cache for org {} for type {}", event.getOrgId(), typeReference.getType());
         List<T> objects = objectMapper.convertValue(event.getData(), typeReference);
         update(event.getOrgId(), objects);
     }
 
     public void add(String orgId, List<T> objects) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        cache.ifPresent(c -> c.add(objects));
+        getCache(orgId).ifPresent(c -> c.add(objects));
     }
 
     public void flush(String orgId) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        cache.ifPresent(Cache::flush);
+        getCache(orgId).ifPresent(Cache::flush);
     }
 
     public void remove(String orgId) {

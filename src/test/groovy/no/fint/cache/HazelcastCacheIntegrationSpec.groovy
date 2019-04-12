@@ -1,5 +1,6 @@
 package no.fint.cache
 
+import no.fint.cache.exceptions.CacheNotFoundException
 import no.fint.cache.testutils.HazelcastConfiguration
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
@@ -32,7 +33,6 @@ class HazelcastCacheIntegrationSpec extends Specification {
         then:
         cache != null
         cache.size() == 0
-        testCacheService.getAll('rogfk.no').size() == 0
     }
 
     def "Get all values from cache"() {
@@ -46,12 +46,12 @@ class HazelcastCacheIntegrationSpec extends Specification {
         values.contains('test2')
     }
 
-    def "Return empty list when the cache is not present"() {
+    def "Throw exception when the cache is not present"() {
         when:
-        def values = testCacheService.getAll('unknown-org', System.currentTimeMillis())
+        testCacheService.getAll('unknown-org', System.currentTimeMillis())
 
         then:
-        values.size() == 0
+        thrown(CacheNotFoundException)
     }
 
     def "Add items to cache"() {

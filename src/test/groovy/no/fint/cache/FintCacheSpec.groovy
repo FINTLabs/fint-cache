@@ -1,12 +1,23 @@
 package no.fint.cache
 
+import no.fint.cache.model.CacheObject
 import spock.lang.Specification
+
+import java.util.stream.Collectors
 
 class FintCacheSpec extends Specification {
     private FintCache defaultCache
 
     void setup() {
         defaultCache = new FintCache()
+    }
+
+    def 'Update cache with empty input'() {
+        when:
+        defaultCache.update([])
+
+        then:
+        noExceptionThrown()
     }
 
     def "Update cache, no existing values"() {
@@ -191,5 +202,37 @@ class FintCacheSpec extends Specification {
         then:
         defaultCache.getLastUpdated() > 0
         updatedSince.size() == 0
+    }
+
+    def 'Populate cache and index' () {
+        given:
+        def l = []
+        def i = 0
+        def cacheobjects = ['some', 'data', 'to', 'cache'].collect { l += ++i; new CacheObject<>(it, l as int[])}
+        defaultCache.updateCache(cacheobjects)
+
+        when:
+        def item = defaultCache.filter(1, { it -> (it == 'some') } ).collect(Collectors.toList())
+
+        then:
+        item
+        item.size() == 1
+        item.every { (it.getObject() == 'some') }
+
+        when:
+        item = defaultCache.filter(3, { it -> (it == 'cache') } ).collect(Collectors.toList())
+
+        then:
+        item
+        item.size() == 1
+        item.every { (it.getObject() == 'cache') }
+
+        when:
+        item = defaultCache.filter(4, { it -> (it == 'cache') } ).collect(Collectors.toList())
+
+        then:
+        item
+        item.size() == 1
+        item.every { (it.getObject() == 'cache') }
     }
 }

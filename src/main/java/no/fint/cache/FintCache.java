@@ -66,9 +66,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public void updateCache(List<CacheObject<T>> objects) {
-        if (objects.isEmpty()) {
-            log.debug("Empty list sent in, will not update cache");
-        } else {
+        if (!objects.isEmpty()) {
             index = Collections.emptyMap();
             Map<String, CacheObject<T>> cacheObjectMap = getCacheMap(objects);
             updateInternal(cacheObjectMap);

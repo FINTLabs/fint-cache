@@ -11,6 +11,7 @@ class CacheObjectSpec extends Specification {
 
         when:
         def cacheObject = new CacheObject(obj)
+        println(cacheObject)
 
         then:
         cacheObject.checksum != null

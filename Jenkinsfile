@@ -11,15 +11,6 @@ pipeline {
                 sh 'gradle --no-daemon clean build'
             }
         }
-        stage('Deploy PR') {
-            environment {
-                BINTRAY = credentials('fint-bintray')
-            }
-            when { changeRequest() }
-            steps {
-                sh "gradle --no-daemon -Pversion=0-${BRANCH_NAME}.${BUILD_NUMBER} -PbintrayUser=${BINTRAY_USR} -PbintrayKey=${BINTRAY_PSW} bintrayUpload"
-            }
-        }
         stage('Deploy Release') {
             environment {
                 BINTRAY = credentials('fint-bintray')

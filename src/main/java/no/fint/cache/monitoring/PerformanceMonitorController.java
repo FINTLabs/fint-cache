@@ -1,6 +1,7 @@
 package no.fint.cache.monitoring;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
+@ConditionalOnProperty(name = "fint.cache.performance-monitor", havingValue = "true")
 @RestController
 @RequestMapping("/performance-monitor")
 public class PerformanceMonitorController {

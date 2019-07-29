@@ -133,4 +133,6 @@ public abstract class CacheService<T extends Serializable> {
 
     public abstract void onAction(Event event);
 
+
+    public abstract void populateCache(String orgId);
 }

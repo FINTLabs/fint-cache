@@ -1,5 +1,6 @@
 package no.fint.cache
 
+import no.fint.cache.model.CacheObject
 import no.fint.cache.exceptions.CacheNotFoundException
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
@@ -58,6 +59,15 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         values.size() == 3
+    }
+
+    def "Adding existing item to cache adds duplicate"() {
+        when:
+        testCacheService.add('rogfk.no', ['test2', 'test3'])
+        def values = testCacheService.getAll('rogfk.no')
+
+        then:
+        values.size() == 4
     }
 
     def "Get all values since timestamp"() {
@@ -160,5 +170,29 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         values.size() == 3
+    }
+
+    def 'Update cache with hashcodes'() {
+        when:
+        def values = testCacheService.getAll('rogfk.no')
+        testCacheService.updateCache('rogfk.no', values.collect { new CacheObject<>(it, [1] as int[])})
+
+        then:
+        testCacheService.hasItems()
+
+        when:
+        def result = testCacheService.getOne('rogfk.no', 1, { it == 'test1'})
+
+        then:
+        result
+        result.isPresent()
+        result.get() == 'test1'
+
+        when:
+        testCacheService.addCache('rogfk.no', [new CacheObject<String>('test4', [4] as int[])])
+        result = testCacheService.getOne('rogfk.no', 4, { true })
+
+        then:
+        result.get() == 'test4'
     }
 }

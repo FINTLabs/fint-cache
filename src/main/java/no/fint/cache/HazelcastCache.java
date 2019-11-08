@@ -27,9 +27,23 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     }
 
     @Override
+    public void updateCache(List<CacheObject<T>> objects) {
+        Cache<T> cache = manager.getCacheInternal(key);
+        cache.updateCache(objects);
+        manager.replace(key, cache);
+    }
+
+    @Override
     public void add(List<T> objects) {
         Cache<T> cache = manager.getCacheInternal(key);
         cache.add(objects);
+        manager.replace(key, cache);
+    }
+
+    @Override
+    public void addCache(List<CacheObject<T>> objects) {
+        Cache<T> cache = manager.getCacheInternal(key);
+        cache.addCache(objects);
         manager.replace(key, cache);
     }
 
@@ -63,6 +77,11 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
         return manager.getCacheInternal(key).filter(predicate);
+    }
+
+    @Override
+    public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
+        return manager.getCacheInternal(key).filter(hashCode, predicate);
     }
 
 }

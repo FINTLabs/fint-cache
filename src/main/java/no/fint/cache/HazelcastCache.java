@@ -75,6 +75,9 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     }
 
     @Override
+    public long volume() { return manager.getCacheInternal(key).volume(); }
+
+    @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
         return manager.getCacheInternal(key).filter(predicate);
     }

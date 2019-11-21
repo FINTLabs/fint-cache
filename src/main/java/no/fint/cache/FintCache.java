@@ -141,6 +141,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             }));
         }
         cacheMetaData.setChecksum(digest.digest());
+        cacheMetaData.setSize(cacheObjects.stream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
     }
 
@@ -156,6 +157,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         cacheMetaData.setCacheCount(0);
         cacheMetaData.setLastUpdated(0);
         cacheMetaData.setChecksum(null);
+        cacheMetaData.setSize(0L);
     }
 
     @Override
@@ -167,6 +169,9 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     public int size() {
         return cacheMetaData.getCacheCount();
     }
+
+    @Override
+    public long volume() { return cacheMetaData.getSize(); }
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {

@@ -35,7 +35,7 @@ class FintCacheSpec extends Specification {
         given:
         def cacheObj1 = 'test-value1'
         def values = new ArrayList()
-        values.add(cacheObj1);
+        values.add(cacheObj1)
         defaultCache.update(values)
 
         def cacheObj2 = 'test-value2'

@@ -1,7 +1,7 @@
 package no.fint.cache
 
-import no.fint.cache.model.CacheObject
 import no.fint.cache.exceptions.CacheNotFoundException
+import no.fint.cache.model.CacheObject
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
 import no.fint.cache.utils.TestCacheService
@@ -31,6 +31,8 @@ class FintCacheIntegrationSpec extends Specification {
         then:
         testCacheService.remove('rogfk.no')
         cache != null
+        cache.size() == 0
+        cache.volume() == 0
     }
 
     def "Get all values from cache"() {

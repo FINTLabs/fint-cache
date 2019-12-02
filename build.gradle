@@ -43,8 +43,8 @@ dependencies {
     testCompile('org.apache.commons:commons-math3:3.6.1')
     compile 'org.apache.commons:commons-compress:1.19'
     compile 'org.tukaani:xz:1.8'
-    compile 'org.msgpack:msgpack:0.6.12'
     compile 'org.jooq:jool-java-8:0.9.14'
+    compile 'com.github.luben:zstd-jni:1.4.3-1'
 }
 
 task wrapper(type: Wrapper) {

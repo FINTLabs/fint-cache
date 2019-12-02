@@ -1,7 +1,7 @@
 package no.fint.cache
 
-import no.fint.cache.model.CacheObject
 import no.fint.cache.exceptions.CacheNotFoundException
+import no.fint.cache.model.CacheObject
 import no.fint.cache.testutils.HazelcastConfiguration
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
@@ -34,6 +34,7 @@ class HazelcastCacheIntegrationSpec extends Specification {
         then:
         cache != null
         cache.size() == 0
+        cache.volume() == 0
     }
 
     def "Get all values from cache"() {

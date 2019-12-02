@@ -23,8 +23,8 @@ class PackerSpec extends Specification {
 
     def 'Deflater actually deflates'() {
         given:
-        def packer1 = new CompressingPacker({OutputStream o -> new DeflaterOutputStream(o)}, { InputStream i -> new InflaterInputStream(i)})
-        def packer2 = new SerializationPacker()
+        def packer1 = PackerFactory.create("deflate")
+        def packer2 = PackerFactory.create("default")
         def obj = new TestDto(id: 'Some random object with some random data that some random compression could do some random magic to!')
 
         when:

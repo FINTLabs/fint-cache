@@ -101,21 +101,21 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> get() {
-        return cacheObjects.stream();
+        return cacheObjects.parallelStream();
     }
 
     public List<T> getSourceList() {
-        return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toList());
+        return cacheObjects.parallelStream().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+        return cacheObjects.parallelStream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {
         return cacheObjects
-                .stream()
+                .parallelStream()
                 .filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp))
                 .map(CacheObject::getObject)
                 .collect(Collectors.toList());
@@ -141,16 +141,16 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             }));
         }
         cacheMetaData.setChecksum(digest.digest());
-        cacheMetaData.setSize(cacheObjects.stream().mapToLong(CacheObject::getSize).sum());
+        cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        return list.stream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
+        return list.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 
     private Map<String, CacheObject<T>> getCacheMap(List<CacheObject<T>> list) {
-        return list.stream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
+        return list.parallelStream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 
     private void flushMetaData() {

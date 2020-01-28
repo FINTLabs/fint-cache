@@ -68,6 +68,10 @@ public abstract class CacheService<T extends Serializable> {
         return getCache(orgId).map(Cache::getLastUpdated).orElseThrow(() -> new CacheNotFoundException(orgId));
     }
 
+    public long getCacheSize(String orgId) {
+        return getCache(orgId).map(Cache::size).orElseThrow(() -> new CacheNotFoundException(orgId));
+    }
+
     public Optional<Cache<T>> getCache(String orgId) {
         return cacheManager.getCache(CacheUri.create(orgId, model));
     }

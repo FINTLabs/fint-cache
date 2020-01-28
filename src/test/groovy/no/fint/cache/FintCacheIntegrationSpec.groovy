@@ -108,6 +108,14 @@ class FintCacheIntegrationSpec extends Specification {
         lastUpdated > 0L
     }
 
+    def "Get cache size"() {
+        when:
+        def size = testCacheService.getCacheSize('rogfk.no')
+
+        then:
+        size == 2
+    }
+
     def "Update cache, add new value"() {
         when:
         testCacheService.update('rogfk.no', ['test1', 'test2', 'test3'])

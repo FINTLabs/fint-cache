@@ -68,7 +68,7 @@ public abstract class CacheService<T extends Serializable> {
         return getCache(orgId).map(Cache::getLastUpdated).orElseThrow(() -> new CacheNotFoundException(orgId));
     }
 
-    public long getCacheSize(String orgId) {
+    public int getCacheSize(String orgId) {
         return getCache(orgId).map(Cache::size).orElseThrow(() -> new CacheNotFoundException(orgId));
     }
 
@@ -92,11 +92,8 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public Optional<T> getOne(String orgId, int hashCode, Predicate<T> idFunction) {
-        Optional<Cache<T>> cache = getCache(orgId);
-        if (cache.isPresent()) {
-            return cache.get().filter(hashCode, idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
-        }
-        return Optional.empty();
+        Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
+        return cache.filter(hashCode, idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
     }
 
     public void update(String orgId, List<T> objects) {

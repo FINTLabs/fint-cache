@@ -26,6 +26,8 @@ public interface Cache<T extends Serializable> {
 
     int size();
 
+    long volume();
+
     Stream<CacheObject<T>> filter(Predicate<T> predicate);
 
     Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate);

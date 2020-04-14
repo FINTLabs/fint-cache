@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public abstract class CacheService<T extends Serializable> {
@@ -77,13 +78,19 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public List<T> getAll(String orgId) {
-        Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
-        return cache.get().map(CacheObject::getObject).collect(Collectors.toList());
+        return streamAll(orgId).collect(Collectors.toList());
+    }
+
+    public Stream<T> streamAll(String orgId) {
+        return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).get().map(CacheObject::getObject);
     }
 
     public List<T> getAll(String orgId, long sinceTimestamp) {
-        Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
-        return cache.getSince(sinceTimestamp).map(CacheObject::getObject).collect(Collectors.toList());
+        return streamSince(orgId, sinceTimestamp).collect(Collectors.toList());
+    }
+
+    public Stream<T> streamSince(String orgId, long sinceTimestamp) {
+        return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).getSince(sinceTimestamp).map(CacheObject::getObject);
     }
 
     public Optional<T> getOne(String orgId, Predicate<T> idFunction) {

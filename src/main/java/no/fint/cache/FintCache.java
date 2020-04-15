@@ -101,21 +101,21 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> get() {
-        return cacheObjects.parallelStream();
+        return cacheObjects.stream();
     }
 
     public List<T> getSourceList() {
-        return cacheObjects.parallelStream().map(CacheObject::getObject).collect(Collectors.toList());
+        return cacheObjects.stream().map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     @Override
     public Stream<CacheObject<T>> getSince(long timestamp) {
-        return cacheObjects.parallelStream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+        return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {
         return cacheObjects
-                .parallelStream()
+                .stream()
                 .filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp))
                 .map(CacheObject::getObject)
                 .collect(Collectors.toList());
@@ -175,7 +175,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
-        return cacheObjects.parallelStream().filter(o -> predicate.test(o.getObject()));
+        return cacheObjects.stream().filter(o -> predicate.test(o.getObject()));
     }
 
     @Override

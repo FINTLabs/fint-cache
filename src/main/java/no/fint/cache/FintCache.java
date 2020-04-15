@@ -100,7 +100,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public Stream<CacheObject<T>> get() {
+    public Stream<CacheObject<T>> stream() {
         return cacheObjects.stream();
     }
 
@@ -109,7 +109,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public Stream<CacheObject<T>> getSince(long timestamp) {
+    public Stream<CacheObject<T>> streamSince(long timestamp) {
         return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 

@@ -127,7 +127,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         when:
-        def updatedSince = defaultCache.getSince(System.currentTimeMillis() - 15000)
+        def updatedSince = defaultCache.streamSince(System.currentTimeMillis() - 15000)
 
         then:
         updatedSince.count() == 1
@@ -141,7 +141,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         when:
-        def updatedSince = defaultCache.getSince(System.currentTimeMillis() + 15000)
+        def updatedSince = defaultCache.streamSince(System.currentTimeMillis() + 15000)
 
         then:
         updatedSince.count() == 0
@@ -155,7 +155,7 @@ class FintCacheSpec extends Specification {
         defaultCache.update(values)
 
         when:
-        def cachedValues = defaultCache.get()
+        def cachedValues = defaultCache.stream()
 
         then:
         cachedValues.findAny().get().getObject() == values.get(0)

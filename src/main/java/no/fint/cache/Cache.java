@@ -18,9 +18,9 @@ public interface Cache<T extends Serializable> {
 
     void flush();
 
-    Stream<CacheObject<T>> get();
+    Stream<CacheObject<T>> stream();
 
-    Stream<CacheObject<T>> getSince(long timestamp);
+    Stream<CacheObject<T>> streamSince(long timestamp);
 
     long getLastUpdated();
 

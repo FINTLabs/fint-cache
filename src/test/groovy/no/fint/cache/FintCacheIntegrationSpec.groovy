@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 
+import java.util.stream.Collectors
+
 @SpringBootTest(classes = [ FintCacheManager, TestCacheService ])
 class FintCacheIntegrationSpec extends Specification {
     @Autowired
@@ -204,5 +206,16 @@ class FintCacheIntegrationSpec extends Specification {
 
         then:
         result.get() == 'test4'
+    }
+
+    def 'Stream cache slice'() {
+        given:
+        testCacheService.update('rogfk.no', ['test1', 'test2', 'test3', 'test4'])
+
+        when:
+        def result = testCacheService.streamSlice('rogfk.no', 1, 1).collect(Collectors.toList())
+
+        then:
+        result == ['test2']
     }
 }

@@ -55,13 +55,13 @@ public class HazelcastCache<T extends Serializable> implements Cache<T> {
     }
 
     @Override
-    public Stream<CacheObject<T>> get() {
-        return manager.getCacheInternal(key).get();
+    public Stream<CacheObject<T>> stream() {
+        return manager.getCacheInternal(key).stream();
     }
 
     @Override
-    public Stream<CacheObject<T>> getSince(long timestamp) {
-        return manager.getCacheInternal(key).getSince(timestamp);
+    public Stream<CacheObject<T>> streamSince(long timestamp) {
+        return manager.getCacheInternal(key).streamSince(timestamp);
     }
 
     @Override

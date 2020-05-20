@@ -218,4 +218,15 @@ class FintCacheIntegrationSpec extends Specification {
         then:
         result == ['test4']
     }
+
+    def 'Stream cache slice since'() {
+        given:
+        testCacheService.update('rogfk.no', ['test1', 'test2', 'test3', 'test4'])
+
+        when:
+        def result = testCacheService.streamSliceSince('rogfk.no', System.currentTimeMillis() - 500, 1, 1).collect(Collectors.toList())
+
+        then:
+        result == ['test4']
+    }
 }

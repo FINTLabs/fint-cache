@@ -58,7 +58,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             });
 
             cacheObjectsCopy.addAll(cacheObjectMap.values());
-            cacheObjects = ImmutableList.copyOf(cacheObjectsCopy);
+            cacheObjects = ImmutableList.sortedCopyOf(Comparator.comparing(CacheObject::getChecksum), cacheObjectsCopy);
         }
 
         updateMetaData();
@@ -82,7 +82,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     private void addInternal(Map<String, CacheObject<T>> newObjects) {
         List<CacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
         cacheObjectsCopy.addAll(newObjects.values());
-        cacheObjects = ImmutableList.copyOf(cacheObjectsCopy);
+        cacheObjects = ImmutableList.sortedCopyOf(Comparator.comparing(CacheObject::getChecksum), cacheObjectsCopy);
         updateMetaData();
     }
 
@@ -133,7 +133,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             int i = iterator.nextIndex();
             CacheObject<T> it = iterator.next();
             digest.update(it.rawChecksum());
-            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, (k,v) -> {
+            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, (k, v) -> {
                 if (v == null) {
                     return new SingleIndex(i);
                 }
@@ -171,7 +171,9 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public long volume() { return cacheMetaData.getSize(); }
+    public long volume() {
+        return cacheMetaData.getSize();
+    }
 
     @Override
     public Stream<CacheObject<T>> filter(Predicate<T> predicate) {

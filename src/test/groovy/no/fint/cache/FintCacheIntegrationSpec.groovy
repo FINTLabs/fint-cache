@@ -174,14 +174,14 @@ class FintCacheIntegrationSpec extends Specification {
 
     def "On received event"() {
         given:
-        def event = new Event(orgId: 'rogfk.no', data: ['test1', 'test2', 'test3'])
+        def event = new Event(orgId: 'rogfk.no', data: ['test1', 'test2', 'test3', 'test4'])
 
         when:
         testCacheService.onAction(event)
         def values = testCacheService.getAll('rogfk.no')
 
         then:
-        values.size() == 3
+        values.size() == 4
     }
 
     def 'Update cache with hashcodes'() {
@@ -216,6 +216,17 @@ class FintCacheIntegrationSpec extends Specification {
         def result = testCacheService.streamSlice('rogfk.no', 1, 1).collect(Collectors.toList())
 
         then:
-        result == ['test2']
+        result == ['test4']
+    }
+
+    def 'Stream cache slice since'() {
+        given:
+        testCacheService.update('rogfk.no', ['test1', 'test2', 'test3', 'test4'])
+
+        when:
+        def result = testCacheService.streamSliceSince('rogfk.no', System.currentTimeMillis() - 500, 1, 1).collect(Collectors.toList())
+
+        then:
+        result == ['test4']
     }
 }

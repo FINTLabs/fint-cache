@@ -102,6 +102,15 @@ public abstract class CacheService<T extends Serializable> {
         return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).streamSince(sinceTimestamp).map(CacheObject::getObject);
     }
 
+    public Stream<T> streamSliceSince(String orgId, long sinceTimestamp, int skip, int limit) {
+        return getCache(orgId)
+                .orElseThrow(() -> new CacheNotFoundException(orgId))
+                .streamSince(sinceTimestamp)
+                .skip(skip)
+                .limit(limit)
+                .map(CacheObject::getObject);
+    }
+
     public Optional<T> getOne(String orgId, Predicate<T> idFunction) {
         Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
         return cache.filter(idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);

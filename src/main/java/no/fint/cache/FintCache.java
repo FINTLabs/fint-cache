@@ -12,7 +12,6 @@ import no.fint.cache.model.SingleIndex;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -32,7 +31,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         cacheMetaData = new CacheMetaData();
         cacheObjects = Collections.emptyList();
         index = Collections.emptyMap();
-        timestampIndex = new ConcurrentSkipListMap<>();
+        timestampIndex = Collections.emptyNavigableMap();
     }
 
     @Override
@@ -114,7 +113,12 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> streamSince(long timestamp) {
-        return timestampIndex.tailMap(timestamp, false).values().stream().flatMapToInt(Index::stream).mapToObj(cacheObjects::get);
+        return timestampIndex
+                .tailMap(timestamp, false)
+                .values()
+                .stream()
+                .flatMapToInt(Index::stream)
+                .mapToObj(cacheObjects::get);
         //return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
@@ -133,6 +137,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     @SneakyThrows
     private void updateMetaData() {
         Map<Integer, Index> newIndex = new HashMap<>();
+        NavigableMap<Long, Index> newTimestampIndex = new TreeMap<>();
         cacheMetaData.setCacheCount(cacheObjects.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
@@ -142,11 +147,12 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             CacheObject<T> it = iterator.next();
             digest.update(it.rawChecksum());
             IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, createIndex(i)));
-            timestampIndex.compute(it.getLastUpdated(), createIndex(i));
+            newTimestampIndex.compute(it.getLastUpdated(), createIndex(i));
         }
         cacheMetaData.setChecksum(digest.digest());
         cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
+        timestampIndex = newTimestampIndex;
     }
 
     private static <K> BiFunction<K, Index, Index> createIndex(int i) {

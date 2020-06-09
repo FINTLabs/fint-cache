@@ -12,6 +12,8 @@ import no.fint.cache.model.SingleIndex;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -24,11 +26,13 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     private CacheMetaData cacheMetaData;
     private List<CacheObject<T>> cacheObjects;
     private Map<Integer, Index> index;
+    private NavigableMap<Long, Index> timestampIndex;
 
     public FintCache() {
         cacheMetaData = new CacheMetaData();
         cacheObjects = Collections.emptyList();
         index = Collections.emptyMap();
+        timestampIndex = new ConcurrentSkipListMap<>();
     }
 
     @Override
@@ -110,15 +114,19 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> streamSince(long timestamp) {
-        return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+        return timestampIndex.tailMap(timestamp, false).values().stream().flatMapToInt(Index::stream).mapToObj(cacheObjects::get);
+        //return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
     }
 
     public List<?> getSourceListSince(long timestamp) {
-        return cacheObjects
+        return streamSince(timestamp).map(CacheObject::getObject).collect(Collectors.toList());
+        /*return cacheObjects
                 .stream()
                 .filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp))
                 .map(CacheObject::getObject)
                 .collect(Collectors.toList());
+
+         */
     }
 
 
@@ -133,16 +141,21 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             int i = iterator.nextIndex();
             CacheObject<T> it = iterator.next();
             digest.update(it.rawChecksum());
-            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, (k, v) -> {
-                if (v == null) {
-                    return new SingleIndex(i);
-                }
-                return v.add(i);
-            }));
+            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, createIndex(i)));
+            timestampIndex.compute(it.getLastUpdated(), createIndex(i));
         }
         cacheMetaData.setChecksum(digest.digest());
         cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
+    }
+
+    private static <K> BiFunction<K, Index, Index> createIndex(int i) {
+        return (k, v) -> {
+            if (v == null) {
+                return new SingleIndex(i);
+            }
+            return v.add(i);
+        };
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {

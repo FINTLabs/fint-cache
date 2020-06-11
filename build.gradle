@@ -31,6 +31,7 @@ dependencies {
     compile('no.fint:fint-hazelcast:1.1.1')
 
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-data-redis:${springBootVersion}")
     compile("org.projectlombok:lombok:${lombokVersion}")
     compile('commons-codec:commons-codec:1.12')
     compile('com.google.guava:guava:27.1-jre')

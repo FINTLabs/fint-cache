@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.SerializationUtils;
 
 import java.io.Serializable;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -91,8 +90,6 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
 
     private void addInternal(Map<String, CacheObject<T>> cacheObjectMap) {
         final List<String> newCacheKeys = new LinkedList<>(cacheKeys);
-        cacheMetaData.setCacheCount(cacheKeys.size());
-        cacheMetaData.setLastUpdated(System.currentTimeMillis());
 
         long size = cacheMetaData.getSize();
         final HashMap<Integer, Index> newIndex = new HashMap<>(index);
@@ -110,6 +107,8 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
 
         }
 
+        cacheMetaData.setCacheCount(cacheKeys.size());
+        cacheMetaData.setLastUpdated(System.currentTimeMillis());
         cacheMetaData.setSize(size);
         cacheKeys = ImmutableList.copyOf(newCacheKeys);
         lastUpdatedMultimap = lastUpdatedBuilder.build();
@@ -143,24 +142,20 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
         updateMetaData(cacheObjectMap);
     }
 
-    @SneakyThrows
     private void updateMetaData(Map<String, CacheObject<T>> cacheObjectMap) {
         Map<Integer, Index> newIndex = new HashMap<>();
         cacheMetaData.setCacheCount(cacheKeys.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
-        MessageDigest digest = MessageDigest.getInstance("SHA-1");
         ListIterator<String> iterator = cacheKeys.listIterator();
         final ImmutableMultimap.Builder<Long, String> lastUpdatedBuilder = ImmutableMultimap.builder();
         long size = 0;
         while (iterator.hasNext()) {
             int i = iterator.nextIndex();
             CacheObject<T> it = cacheObjectMap.get(iterator.next());
-            digest.update(it.rawChecksum());
             updateIndex(newIndex, it, i);
             size += it.getSize();
             lastUpdatedBuilder.put(it.getLastUpdated(), it.getChecksum());
         }
-        cacheMetaData.setChecksum(digest.digest());
         cacheMetaData.setSize(size);
         index = ImmutableMap.copyOf(newIndex);
         lastUpdatedMultimap = lastUpdatedBuilder.build();

@@ -9,8 +9,11 @@ import no.fint.cache.utils.TestCacheService
 import no.fint.event.model.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import spock.lang.Ignore
 import spock.lang.Specification
 
+// Requires Redis server running locally
+@Ignore
 @SpringBootTest(classes = [ RedisConfiguration, RedisCacheManager, TestCacheService ])
 class RedisCacheIntegrationSpec extends Specification {
 

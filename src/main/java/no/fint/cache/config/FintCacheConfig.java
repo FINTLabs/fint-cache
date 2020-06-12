@@ -3,26 +3,36 @@ package no.fint.cache.config;
 import no.fint.cache.CacheManager;
 import no.fint.cache.FintCacheManager;
 import no.fint.cache.HazelcastCacheManager;
+import no.fint.cache.RedisCacheManager;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.model.PackerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import no.fint.cache.utils.RedisCacheConnectionFactory;
+import no.fint.cache.utils.RedisConnectionString;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.stream.Collectors;
 
 @Configuration
 public class FintCacheConfig {
 
-    @Value("${fint.cache.manager:default}")
-    private String cacheManagerType;
-
-    @Value("${fint.cache.packer:serialization}")
-    private String cachePackerType;
+    @Bean
+    public FintCacheProperties fintCacheProperties() {
+        return new FintCacheProperties();
+    }
 
     @Bean
-    public CacheManager<?> cacheManager() {
-        CacheObject.PACKER = PackerFactory.create(cachePackerType);
+    public CacheManager<?> cacheManager(FintCacheProperties properties) {
+        CacheObject.PACKER = PackerFactory.create(properties.getPacker());
 
-        switch (cacheManagerType.toUpperCase()) {
+        switch (properties.getManager().toUpperCase()) {
+            case "REDIS":
+                return new RedisCacheManager<>(properties
+                        .getServers()
+                        .stream()
+                        .map(RedisConnectionString::parse)
+                        .map(RedisCacheConnectionFactory::toJedisConnectionFactory)
+                        .collect(Collectors.toList()));
             case "HAZELCAST":
                 return new HazelcastCacheManager<>();
             default:

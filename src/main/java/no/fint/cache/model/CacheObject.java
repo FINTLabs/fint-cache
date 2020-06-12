@@ -54,10 +54,6 @@ public final class CacheObject<T extends Serializable> implements Serializable {
         return Hex.encodeHexString(checksum);
     }
 
-    public byte[] rawChecksum() {
-        return checksum;
-    }
-
     public static class BytesSupplier implements Supplier<byte[]>, Serializable {
 
         private final byte[] bytes;

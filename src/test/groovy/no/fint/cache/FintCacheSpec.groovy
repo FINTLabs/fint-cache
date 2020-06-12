@@ -116,7 +116,6 @@ class FintCacheSpec extends Specification {
         then:
         defaultCache.size() == 0
         defaultCache.cacheMetaData.lastUpdated == 0
-        defaultCache.cacheMetaData.checksum == null
     }
 
     def "Get updated cache objects since timestamp, new objects"() {

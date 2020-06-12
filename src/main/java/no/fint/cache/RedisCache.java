@@ -112,6 +112,7 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
         cacheMetaData.setSize(size);
         cacheKeys = ImmutableList.copyOf(newCacheKeys);
         lastUpdatedMultimap = lastUpdatedBuilder.build();
+        index = ImmutableMap.copyOf(newIndex);
     }
 
 
@@ -119,7 +120,7 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
         final ImmutableMultimap<String, Long> lastUpdatedByChecksum = lastUpdatedMultimap.inverse();
 
         final List<String> removed = lastUpdatedByChecksum.keys().stream().filter(k -> !cacheObjectMap.containsKey(k)).collect(Collectors.toList());
-        log.info("Removing {}", removed);
+        log.info("Removing {}", removed.size());
         valueOperations.getOperations().delete(removed.stream().map(this::dataKey).collect(Collectors.toList()));
         valueOperations.getOperations().delete(removed.stream().map(this::metaKey).collect(Collectors.toList()));
 
@@ -128,7 +129,6 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
                 .stream()
                 .filter(lastUpdatedByChecksum::containsKey)
                 .forEach(k -> {
-                    log.info("Refresh {}", k);
                     valueOperations.getOperations().expire(dataKey(k), 30, TimeUnit.MINUTES);
                     valueOperations.getOperations().expire(metaKey(k), 30, TimeUnit.MINUTES);
                 });
@@ -162,7 +162,6 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
     }
 
     private void insertEntry(String key, CacheObject<T> value) {
-        log.info("Insert {}", key);
         valueOperations.set(dataKey(key), value.getBytes(), 30, TimeUnit.MINUTES);
         MetaObject m = new MetaObject();
         m.setHashCodes(value.getHashCodes());
@@ -208,7 +207,7 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
 
     @Override
     public Stream<CacheObject<T>> stream() {
-        return cacheKeys.stream().peek(it -> log.info("Get {}", it)).map(this::getCacheObject);
+        return cacheKeys.stream().map(this::getCacheObject);
     }
 
     @Override

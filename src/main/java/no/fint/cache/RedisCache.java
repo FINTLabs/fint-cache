@@ -182,6 +182,9 @@ public class RedisCache<T extends Serializable> implements Cache<T> {
     @SneakyThrows
     private CacheObject<T> getCacheObject(String key) {
         MetaObject metaObject = (MetaObject) SerializationUtils.deserialize(valueOperations.get(metaKey(key)));
+        if (metaObject == null) {
+            return null;
+        }
         return new CacheObject<>(() -> valueOperations.get(dataKey(key)),
                 metaObject.getLastUpdated(),
                 metaObject.getSize(),

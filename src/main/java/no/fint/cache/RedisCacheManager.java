@@ -31,6 +31,7 @@ public class RedisCacheManager<T extends Serializable> implements CacheManager<T
         template.afterPropertiesSet();
         RedisCache<T> cache = new RedisCache<>(key, template);
         redisCacheMap.put(key, cache);
+        log.info("Created cache {}", key);
         return cache;
     }
 

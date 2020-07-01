@@ -1,7 +1,6 @@
 package no.fint.cache;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +25,10 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     private CacheMetaData cacheMetaData;
     private List<CacheObject<T>> cacheObjects;
     private Map<Integer, Index> index;
-    private ImmutableMultimap<Long, Integer> lastUpdatedIndex;
+    private NavigableMap<Long, BitSet> lastUpdatedIndex;
 
     public FintCache() {
-        cacheMetaData = new CacheMetaData();
-        cacheObjects = Collections.emptyList();
-        index = Collections.emptyMap();
-        lastUpdatedIndex = ImmutableMultimap.of();
+        flush();
     }
 
     @Override
@@ -102,7 +98,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         cacheMetaData = new CacheMetaData();
         cacheObjects = Collections.emptyList();
         index = Collections.emptyMap();
-        lastUpdatedIndex = ImmutableMultimap.of();
+        lastUpdatedIndex = Collections.emptyNavigableMap();
     }
 
     @Override
@@ -117,30 +113,22 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     @Override
     public Stream<CacheObject<T>> streamSince(long timestamp) {
         return lastUpdatedIndex
-                .entries()
+                .tailMap(timestamp, false)
+                .values()
                 .stream()
-                .filter(e -> e.getKey() > timestamp)
-                .map(Map.Entry::getValue)
-                .map(cacheObjects::get);
-        //return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+                .flatMapToInt(BitSet::stream)
+                .mapToObj(cacheObjects::get);
     }
 
     public List<?> getSourceListSince(long timestamp) {
         return streamSince(timestamp).map(CacheObject::getObject).collect(Collectors.toList());
-        /*return cacheObjects
-                .stream()
-                .filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp))
-                .map(CacheObject::getObject)
-                .collect(Collectors.toList());
-
-         */
     }
 
 
     @SneakyThrows
     private void updateMetaData() {
         Map<Integer, Index> newIndex = new HashMap<>();
-        final ImmutableMultimap.Builder<Long, Integer> lastUpdatedBuilder = ImmutableMultimap.builder();
+        NavigableMap<Long, BitSet> newLastUpdatedIndex = new TreeMap<>();
         cacheMetaData.setCacheCount(cacheObjects.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
@@ -150,12 +138,12 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             CacheObject<T> it = iterator.next();
             digest.update(it.rawChecksum());
             IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, createIndex(i)));
-            lastUpdatedBuilder.put(it.getLastUpdated(), i);
+            newLastUpdatedIndex.computeIfAbsent(it.getLastUpdated(), k -> new BitSet()).set(i);
         }
         cacheMetaData.setChecksum(digest.digest());
         cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
-        lastUpdatedIndex = lastUpdatedBuilder.build();
+        lastUpdatedIndex = newLastUpdatedIndex;
     }
 
     private static <K> BiFunction<K, Index, Index> createIndex(int i) {

@@ -2,7 +2,6 @@ package no.fint.cache;
 
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheMetaData;
 import no.fint.cache.model.CacheObject;
@@ -10,7 +9,6 @@ import no.fint.cache.model.Index;
 import no.fint.cache.model.SingleIndex;
 
 import java.io.Serializable;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -124,23 +122,18 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         return streamSince(timestamp).map(CacheObject::getObject).collect(Collectors.toList());
     }
 
-
-    @SneakyThrows
     private void updateMetaData() {
         Map<Integer, Index> newIndex = new HashMap<>();
         NavigableMap<Long, BitSet> newLastUpdatedIndex = new TreeMap<>();
         cacheMetaData.setCacheCount(cacheObjects.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
-        MessageDigest digest = MessageDigest.getInstance("SHA-1");
         ListIterator<CacheObject<T>> iterator = cacheObjects.listIterator();
         while (iterator.hasNext()) {
             int i = iterator.nextIndex();
             CacheObject<T> it = iterator.next();
-            digest.update(it.rawChecksum());
             IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, createIndex(i)));
             newLastUpdatedIndex.computeIfAbsent(it.getLastUpdated(), k -> new BitSet()).set(i);
         }
-        cacheMetaData.setChecksum(digest.digest());
         cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
         lastUpdatedIndex = newLastUpdatedIndex;

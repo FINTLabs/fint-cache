@@ -10,6 +10,7 @@ import no.fint.cache.model.SingleIndex;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -19,14 +20,13 @@ import java.util.stream.Stream;
 @Slf4j
 public class FintCache<T extends Serializable> implements Cache<T>, Serializable {
     @Getter
-    private final CacheMetaData cacheMetaData;
+    private CacheMetaData cacheMetaData;
     private List<CacheObject<T>> cacheObjects;
     private Map<Integer, Index> index;
+    private NavigableMap<Long, BitSet> lastUpdatedIndex;
 
     public FintCache() {
-        cacheMetaData = new CacheMetaData();
-        cacheObjects = Collections.emptyList();
-        index = Collections.emptyMap();
+        flush();
     }
 
     @Override
@@ -93,8 +93,10 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public void flush() {
-        flushMetaData();
+        cacheMetaData = new CacheMetaData();
         cacheObjects = Collections.emptyList();
+        index = Collections.emptyMap();
+        lastUpdatedIndex = Collections.emptyNavigableMap();
     }
 
     @Override
@@ -108,35 +110,43 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<CacheObject<T>> streamSince(long timestamp) {
-        return cacheObjects.stream().filter(cacheObject -> (cacheObject.getLastUpdated() > timestamp));
+        return lastUpdatedIndex
+                .tailMap(timestamp, false)
+                .values()
+                .stream()
+                .flatMapToInt(BitSet::stream)
+                .mapToObj(cacheObjects::get);
     }
 
     public List<?> getSourceListSince(long timestamp) {
-        return cacheObjects
-                .stream()
-                .filter(cacheObject -> (cacheObject.getLastUpdated() >= timestamp))
-                .map(CacheObject::getObject)
-                .collect(Collectors.toList());
+        return streamSince(timestamp).map(CacheObject::getObject).collect(Collectors.toList());
     }
 
     private void updateMetaData() {
         Map<Integer, Index> newIndex = new HashMap<>();
+        NavigableMap<Long, BitSet> newLastUpdatedIndex = new TreeMap<>();
         cacheMetaData.setCacheCount(cacheObjects.size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
         ListIterator<CacheObject<T>> iterator = cacheObjects.listIterator();
         while (iterator.hasNext()) {
             int i = iterator.nextIndex();
             CacheObject<T> it = iterator.next();
-            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, (k, v) -> {
-                if (v == null) {
-                    return new SingleIndex(i);
-                }
-                return v.add(i);
-            }));
+            IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, createIndex(i)));
+            newLastUpdatedIndex.computeIfAbsent(it.getLastUpdated(), k -> new BitSet()).set(i);
         }
         cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObject::getSize).sum());
         index = newIndex;
+        lastUpdatedIndex = newLastUpdatedIndex;
     }
+
+    private static <K> BiFunction<K, Index, Index> createIndex(int i) {
+        return (k, v) -> {
+            if (v == null) {
+                return new SingleIndex(i);
+            }
+            return v.add(i);
+            };
+        }
 
     static <U extends Serializable> Map<String, CacheObject<U>> getMap(List<U> list) {
         return list.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
@@ -144,12 +154,6 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     static <U extends Serializable> Map<String, CacheObject<U>> getCacheMap(List<CacheObject<U>> list) {
         return list.parallelStream().collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
-    }
-
-    private void flushMetaData() {
-        cacheMetaData.setCacheCount(0);
-        cacheMetaData.setLastUpdated(0);
-        cacheMetaData.setSize(0L);
     }
 
     @Override

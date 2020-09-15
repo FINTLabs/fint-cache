@@ -145,8 +145,8 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
                 return new SingleIndex(i);
             }
             return v.add(i);
-            };
-        }
+        };
+    }
 
     static <U extends Serializable> Map<String, CacheObject<U>> getMap(List<U> list) {
         return list.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));

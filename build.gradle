@@ -19,7 +19,7 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
     maven {
         url 'https://repo.fintlabs.no/releases'
     }
@@ -31,9 +31,11 @@ dependencies {
     compile('no.fint:fint-hazelcast:1.2.0')
 
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-data-redis:${springBootVersion}")
     compile("org.projectlombok:lombok:${lombokVersion}")
     compile('commons-codec:commons-codec:1.12')
     compile('com.google.guava:guava:27.1-jre')
+    compile('org.apache.commons:commons-lang3:3.10')
 
     testCompile("cglib:cglib-nodep:${cglibVersion}")
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")

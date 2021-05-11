@@ -8,6 +8,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.Serializable;
+import java.util.function.Supplier;
 
 @Getter
 @EqualsAndHashCode(of = "checksum")
@@ -17,12 +18,16 @@ public final class CacheObject<T extends Serializable> implements Serializable {
 
     private final byte[] checksum;
     private final long lastUpdated;
-    private final byte[] bytes;
+    private final Supplier<byte[]> supplier;
     private final int[] hashCodes;
     private final int size;
 
     public T getObject() {
-        return (T) PACKER.unpack(bytes);
+        return (T) PACKER.unpack(getBytes());
+    }
+
+    public byte[] getBytes() {
+        return supplier.get();
     }
 
     public CacheObject(T obj) {
@@ -30,15 +35,36 @@ public final class CacheObject<T extends Serializable> implements Serializable {
     }
 
     public CacheObject(T object, int[] hashes) {
-        lastUpdated = System.currentTimeMillis();
-        bytes = PACKER.pack(object);
-        checksum = DigestUtils.sha1(bytes);
-        hashCodes = hashes;
-        size = bytes.length;
+        this(PACKER.pack(object), hashes);
+    }
+
+    public CacheObject(byte[] bytes, int[] hashCodes) {
+        this(new BytesSupplier(bytes), System.currentTimeMillis(), bytes.length, hashCodes, DigestUtils.sha1(bytes));
+    }
+
+    public CacheObject(Supplier<byte[]> supplier, long lastUpdated, int size, int[] hashCodes, byte[] checksum) {
+        this.lastUpdated = lastUpdated;
+        this.supplier = supplier;
+        this.size = size;
+        this.hashCodes = hashCodes;
+        this.checksum = checksum;
     }
 
     public String getChecksum() {
         return Hex.encodeHexString(checksum);
     }
 
+    public static class BytesSupplier implements Supplier<byte[]>, Serializable {
+
+        private final byte[] bytes;
+
+        public BytesSupplier(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        @Override
+        public byte[] get() {
+            return bytes;
+        }
+    }
 }

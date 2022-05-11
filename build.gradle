@@ -19,7 +19,7 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenLocal()
-    jcenter()
+    //jcenter()
     maven {
         url 'https://repo.fintlabs.no/releases'
     }

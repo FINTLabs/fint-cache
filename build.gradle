@@ -18,11 +18,9 @@ jar {
 sourceCompatibility = 1.8
 
 repositories {
+    maven { url 'https://repo.fintlabs.no/releases' }
+    jcenter()
     mavenLocal()
-    //jcenter()
-    maven {
-        url 'https://repo.fintlabs.no/releases'
-    }
 }
 
 apply from: 'https://raw.githubusercontent.com/FINTlibs/fint-buildscripts/v1.5.0/dependencies.gradle'

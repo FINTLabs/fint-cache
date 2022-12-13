@@ -1,6 +1,6 @@
 package no.fint.cache
 
-import no.fint.cache.model.CacheObject
+import no.fint.cache.model.ByteArrayCacheObject
 import spock.lang.Specification
 
 import java.util.stream.Collectors
@@ -208,7 +208,7 @@ class FintCacheSpec extends Specification {
         given:
         def l = []
         def i = 0
-        def cacheobjects = ['some', 'data', 'to', 'cache'].collect { l += ++i; new CacheObject<>(it, l as int[])}
+        def cacheobjects = ['some', 'data', 'to', 'cache'].collect { l += ++i; new ByteArrayCacheObject<>(it, l as int[])}
         defaultCache.updateCache(cacheobjects)
 
         when:

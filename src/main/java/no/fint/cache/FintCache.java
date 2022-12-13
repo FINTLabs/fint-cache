@@ -3,10 +3,7 @@ package no.fint.cache;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import no.fint.cache.model.CacheMetaData;
-import no.fint.cache.model.CacheObject;
-import no.fint.cache.model.Index;
-import no.fint.cache.model.SingleIndex;
+import no.fint.cache.model.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -149,7 +146,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     private Map<String, CacheObject<T>> getMap(List<T> list) {
-        return list.parallelStream().map(CacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
+        return list.parallelStream().map(ByteArrayCacheObject::new).collect(Collectors.toMap(CacheObject::getChecksum, Function.identity(), (a, b) -> b));
     }
 
     private Map<String, CacheObject<T>> getCacheMap(List<CacheObject<T>> list) {

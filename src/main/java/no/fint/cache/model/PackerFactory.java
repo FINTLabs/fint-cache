@@ -5,13 +5,15 @@ import java.util.zip.InflaterInputStream;
 
 public final class PackerFactory {
     private PackerFactory() {
-        
+
     }
-    
+
     public static Packer create(String type) {
         switch (type.toUpperCase()) {
             case "DEFLATE":
                 return new CompressingPacker(DeflaterOutputStream::new, InflaterInputStream::new);
+            case "POJO":
+                return new PojoPacker();
             default:
                 return new SerializationPacker();
         }

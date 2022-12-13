@@ -10,7 +10,7 @@ class CacheObjectSpec extends Specification {
         def obj = "test value"
 
         when:
-        def cacheObject = new CacheObject(obj)
+        def cacheObject = new ByteArrayCacheObject(obj)
         println(cacheObject)
 
         then:

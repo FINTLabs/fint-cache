@@ -3,7 +3,7 @@ package no.fint.cache.config;
 import no.fint.cache.CacheManager;
 import no.fint.cache.FintCacheManager;
 import no.fint.cache.HazelcastCacheManager;
-import no.fint.cache.model.CacheObject;
+import no.fint.cache.model.ByteArrayCacheObject;
 import no.fint.cache.model.PackerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ public class FintCacheConfig {
 
     @Bean
     public CacheManager<?> cacheManager() {
-        CacheObject.PACKER = PackerFactory.create(cachePackerType);
+        ByteArrayCacheObject.PACKER = PackerFactory.create(cachePackerType);
 
         switch (cacheManagerType.toUpperCase()) {
             case "HAZELCAST":

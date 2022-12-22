@@ -12,8 +12,6 @@ public final class PackerFactory {
         switch (type.toUpperCase()) {
             case "DEFLATE":
                 return new CompressingPacker(DeflaterOutputStream::new, InflaterInputStream::new);
-            case "POJO":
-                return new PojoPacker();
             default:
                 return new SerializationPacker();
         }

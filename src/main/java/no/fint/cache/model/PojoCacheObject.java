@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Getter
 @EqualsAndHashCode(of = "checksum")
 @ToString
-public class PojoCacheObject<T extends Serializable> implements CacheObject<T> {
+public class PojoCacheObject<T extends Serializable> implements CacheObjectType<T> {
 
     private final byte[] checksum;
     private final long lastUpdated;

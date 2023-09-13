@@ -3,7 +3,7 @@ package no.fint.cache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.CacheMetaData;
-import no.fint.cache.model.CacheObject;
+import no.fint.cache.model.CacheObjectType;
 import no.fint.cache.model.PojoCacheObject;
 
 import java.io.Serializable;
@@ -39,7 +39,7 @@ public class PojoCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public void updateCache(List<CacheObject<T>> cacheObjects) {
+    public void updateCache(List<? extends CacheObjectType<T>> cacheObjects) {
         cacheObjects.forEach(object -> {
             if (contains(object.getObject())) {
                 if (object instanceof PojoCacheObject) {
@@ -64,7 +64,7 @@ public class PojoCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public void addCache(List<CacheObject<T>> cacheObjects) {
+    public void addCache(List<? extends CacheObjectType<T>> cacheObjects) {
         cacheObjects.forEach(object -> {
             if (object instanceof PojoCacheObject) {
                 pojoCacheObjects.add((PojoCacheObject<T>) object);
@@ -83,12 +83,12 @@ public class PojoCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public Stream<CacheObject<T>> stream() {
+    public Stream<CacheObjectType<T>> stream() {
         return null;
     }
 
     @Override
-    public Stream<CacheObject<T>> streamSince(long timestamp) {
+    public Stream<CacheObjectType<T>> streamSince(long timestamp) {
         return null;
     }
 
@@ -108,12 +108,12 @@ public class PojoCache<T extends Serializable> implements Cache<T>, Serializable
     }
 
     @Override
-    public Stream<CacheObject<T>> filter(Predicate<T> predicate) {
+    public Stream<CacheObjectType<T>> filter(Predicate<T> predicate) {
         return null;
     }
 
     @Override
-    public Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate) {
+    public Stream<CacheObjectType<T>> filter(int hashCode, Predicate<T> predicate) {
         return null;
     }
 

@@ -1,7 +1,7 @@
 package no.fint.cache
 
 import no.fint.cache.exceptions.CacheNotFoundException
-import no.fint.cache.model.ByteArrayCacheObject
+import no.fint.cache.model.CacheObject
 import no.fint.cache.testutils.TestAction
 import no.fint.cache.utils.CacheUri
 import no.fint.cache.utils.TestCacheService
@@ -187,7 +187,7 @@ class FintCacheIntegrationSpec extends Specification {
     def 'Update cache with hashcodes'() {
         when:
         def values = testCacheService.getAll('rogfk.no')
-        testCacheService.updateCache('rogfk.no', values.collect { new ByteArrayCacheObject<>(it, [1] as int[])})
+        testCacheService.updateCache('rogfk.no', values.collect { new CacheObject<>(it, [1] as int[])})
 
         then:
         testCacheService.hasItems()
@@ -201,7 +201,7 @@ class FintCacheIntegrationSpec extends Specification {
         result.get() == 'test1'
 
         when:
-        testCacheService.addCache('rogfk.no', [new ByteArrayCacheObject<String>('test4', [4] as int[])])
+        testCacheService.addCache('rogfk.no', [new CacheObject<String>('test4', [4] as int[])])
         result = testCacheService.getOne('rogfk.no', 4, { true })
 
         then:

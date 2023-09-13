@@ -1,17 +1,46 @@
 package no.fint.cache.model;
 
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.Serializable;
 
-public interface CacheObject<T extends Serializable> extends Serializable {
-    T getObject();
+@Getter
+@EqualsAndHashCode(of = "checksum")
+@ToString
+public final class CacheObject<T extends Serializable> implements CacheObjectType<T> {
+    public static Packer PACKER = new SerializationPacker();
 
-    String getChecksum();
+    private final byte[] checksum;
+    private final long lastUpdated;
+    private final byte[] bytes;
+    private final int[] hashCodes;
+    private final int size;
 
-    long getLastUpdated();
+    @Override
+    public T getObject() {
+        return (T) PACKER.unpack(bytes);
+    }
 
-    byte[] getBytes();
+    public CacheObject(T obj) {
+        this(obj, new int[0]);
+    }
 
-    int[] getHashCodes();
+    public CacheObject(T object, int[] hashes) {
+        lastUpdated = System.currentTimeMillis();
+        bytes = PACKER.pack(object);
+        checksum = DigestUtils.sha1(bytes);
+        hashCodes = hashes;
+        size = bytes.length;
+    }
 
-    int getSize();
+    @Override
+    public String getChecksum() {
+        return Hex.encodeHexString(checksum);
+    }
+
 }

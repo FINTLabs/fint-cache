@@ -2,7 +2,6 @@ package no.fint.cache.config;
 
 import no.fint.cache.CacheManager;
 import no.fint.cache.FintCacheManager;
-import no.fint.cache.PojoCacheManager;
 import no.fint.cache.model.CacheObject;
 import no.fint.cache.model.PackerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +24,6 @@ public class FintCacheConfig {
         switch (cacheManagerType.toUpperCase()) {
             case "HAZELCAST":
                 throw new IllegalArgumentException();
-            case "POJO":
-                return new PojoCacheManager<>();
             default:
                 return new FintCacheManager<>();
         }

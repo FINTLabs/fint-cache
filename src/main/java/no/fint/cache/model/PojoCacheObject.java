@@ -23,15 +23,22 @@ public class PojoCacheObject<T extends Serializable> implements CacheObjectType<
         return resource;
     }
 
-    public PojoCacheObject(T obj) {
-        this(obj, new int[0]);
+    public PojoCacheObject(CacheObject<T> cacheObject) {
+        lastUpdated = System.currentTimeMillis();
+        resource = cacheObject.getObject();
+        this.checksum = cacheObject.getChecksumRaw();
+        hashCodes = cacheObject.getHashCodes();
+        size = 0;
     }
 
-    public PojoCacheObject(T object, int[] hashes) {
+
+    public PojoCacheObject(T object) {
+
+        CacheObject<T> cacheObject = new CacheObject<>(object, new int[] {object.hashCode()});
         lastUpdated = System.currentTimeMillis();
-        resource = object;
-        checksum = new byte[0];
-        hashCodes = hashes;
+        resource = cacheObject.getObject();
+        this.checksum = cacheObject.getChecksumRaw();
+        hashCodes = cacheObject.getHashCodes();
         size = 0;
     }
 

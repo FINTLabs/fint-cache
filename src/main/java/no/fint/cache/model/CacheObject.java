@@ -43,4 +43,7 @@ public final class CacheObject<T extends Serializable> implements CacheObjectTyp
         return Hex.encodeHexString(checksum);
     }
 
+    public byte[] getChecksumRaw() {
+        return checksum;
+    }
 }

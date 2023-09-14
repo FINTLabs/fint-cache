@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.exceptions.CacheNotFoundException;
+import no.fint.cache.model.CacheObject;
 import no.fint.cache.model.CacheObjectType;
 import no.fint.cache.utils.CacheUri;
 import no.fint.event.model.Event;
@@ -125,7 +126,7 @@ public abstract class CacheService<T extends Serializable> {
         getCache(orgId).ifPresent(c -> c.update(objects));
     }
 
-    public void updateCache(String orgId, List<? extends CacheObjectType<T>> objects) {
+    public void updateCache(String orgId, List<CacheObject<T>> objects) {
         Optional<Cache<T>> cache = getCache(orgId);
         cache.ifPresent(c -> c.updateCache(objects));
     }
@@ -142,7 +143,7 @@ public abstract class CacheService<T extends Serializable> {
         getCache(orgId).ifPresent(c -> c.add(objects));
     }
 
-    public void addCache(String orgId, List<? extends CacheObjectType<T>> objects) {
+    public void addCache(String orgId, List<CacheObject<T>> objects) {
         Optional<Cache<T>> cache = getCache(orgId);
         cache.ifPresent(c -> c.addCache(objects));
     }

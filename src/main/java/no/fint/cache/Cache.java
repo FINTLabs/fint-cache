@@ -1,5 +1,6 @@
 package no.fint.cache;
 
+import no.fint.cache.model.CacheObject;
 import no.fint.cache.model.CacheObjectType;
 
 import java.io.Serializable;
@@ -10,11 +11,11 @@ import java.util.stream.Stream;
 public interface Cache<T extends Serializable> {
     void update(List<T> objects);
 
-    void updateCache(List<? extends CacheObjectType<T>> objects);
+    void updateCache(List<CacheObject<T>> objects);
 
     void add(List<T> objects);
 
-    void addCache(List<? extends CacheObjectType<T>> objects);
+    void addCache(List<CacheObject<T>> objects);
 
     void flush();
 

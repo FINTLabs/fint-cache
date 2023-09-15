@@ -34,12 +34,30 @@ public class PojoCacheObject<T extends Serializable> implements CacheObjectType<
 
     public PojoCacheObject(T object) {
 
-        CacheObject<T> cacheObject = new CacheObject<>(object, new int[] {object.hashCode()});
+        CacheObject<T> cacheObject = new CacheObject<>(object, new int[]{object.hashCode()});
         lastUpdated = System.currentTimeMillis();
         resource = cacheObject.getObject();
         this.checksum = cacheObject.getChecksumRaw();
         hashCodes = cacheObject.getHashCodes();
         size = 0;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+
+        final PojoCacheObject other = (PojoCacheObject) object;
+
+        if (this.resource == null && other.getResource() == null) return true;
+        if (this.resource == null || other.getResource() == null) return false;
+
+        return this.resource.equals(other.getResource());
+    }
+
+    @Override
+    public int hashCode() {
+        return resource.hashCode();
     }
 
     @Override

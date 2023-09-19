@@ -1,6 +1,5 @@
 package no.fint.cache;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.model.*;
@@ -18,11 +17,12 @@ import java.util.stream.Stream;
 public class FintCache<T extends Serializable> implements Cache<T>, Serializable {
     @Getter
     private CacheMetaData cacheMetaData;
-    private List<PojoCacheObject<T>> cacheObjects;
+    private FintCacheList<T> fintCacheList;
     private Map<Integer, Index> index;
     private NavigableMap<Long, BitSet> lastUpdatedIndex;
 
     public FintCache() {
+        fintCacheList = new FintCacheList<>();
         flush();
     }
 
@@ -32,31 +32,9 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
             log.debug("Empty list sent in, will not update cache");
         } else {
             Map<String, PojoCacheObject<T>> cacheObjectMap = getMap(objects);
-            updateInternal(cacheObjectMap);
+            fintCacheList.updateInternal(cacheObjectMap);
+            updateMetaData();
         }
-    }
-
-    private void updateInternal(Map<String, PojoCacheObject<T>> cacheObjectMap) {
-        if (cacheObjects.isEmpty()) {
-            log.debug("Empty cache, adding all values");
-            cacheObjects = ImmutableList.copyOf(cacheObjectMap.values());
-        } else {
-            List<PojoCacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
-            cacheObjects.forEach(cacheObject -> {
-                String checksum = cacheObject.getChecksum();
-                if (cacheObjectMap.containsKey(checksum)) {
-                    cacheObjectMap.remove(checksum);
-                } else {
-                    log.debug("Adding new object to the cache (checksum: {})", cacheObject.getChecksum());
-                    cacheObjectsCopy.remove(cacheObject);
-                }
-            });
-
-            cacheObjectsCopy.addAll(cacheObjectMap.values());
-            cacheObjects = ImmutableList.sortedCopyOf(Comparator.comparing(CacheObjectType::getChecksum), cacheObjectsCopy);
-        }
-
-        updateMetaData();
     }
 
     @Override
@@ -66,7 +44,8 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
             List<PojoCacheObject<T>> pojoCacheObjects = mapToPojoCacheObjects(objects);
             Map<String, PojoCacheObject<T>> cacheObjectMap = getCacheMap(pojoCacheObjects);
-            updateInternal(cacheObjectMap);
+            fintCacheList.updateInternal(cacheObjectMap);
+            updateMetaData();
         }
     }
 
@@ -80,13 +59,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     @Override
     public void add(List<T> objects) {
         Map<String, PojoCacheObject<T>> newObjects = getMap(objects);
-        addInternal(newObjects);
-    }
-
-    private void addInternal(Map<String, PojoCacheObject<T>> newObjects) {
-        List<PojoCacheObject<T>> cacheObjectsCopy = new ArrayList<>(cacheObjects);
-        cacheObjectsCopy.addAll(newObjects.values());
-        cacheObjects = ImmutableList.sortedCopyOf(Comparator.comparing(CacheObjectType::getChecksum), cacheObjectsCopy);
+        fintCacheList.addInternal(newObjects);
         updateMetaData();
     }
 
@@ -94,24 +67,25 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     public void addCache(List<CacheObject<T>> cacheObjects) {
         List<PojoCacheObject<T>> pojoCacheObjects = mapToPojoCacheObjects(cacheObjects);
         Map<String, PojoCacheObject<T>> cacheMap = getCacheMap(pojoCacheObjects);
-        addInternal(cacheMap);
+        fintCacheList.addInternal(cacheMap);
+        updateMetaData();
     }
 
     @Override
     public void flush() {
         cacheMetaData = new CacheMetaData();
-        cacheObjects = Collections.emptyList();
+        fintCacheList.flush();
         index = Collections.emptyMap();
         lastUpdatedIndex = Collections.emptyNavigableMap();
     }
 
     @Override
     public Stream<? extends CacheObjectType<T>> stream() {
-        return cacheObjects.stream();
+        return fintCacheList.getCacheObjects().stream();
     }
 
     public List<T> getSourceList() {
-        return cacheObjects.stream().map(CacheObjectType::getObject).collect(Collectors.toList());
+        return fintCacheList.getCacheObjects().stream().map(CacheObjectType::getObject).collect(Collectors.toList());
     }
 
     @Override
@@ -121,7 +95,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
                 .values()
                 .stream()
                 .flatMapToInt(BitSet::stream)
-                .mapToObj(cacheObjects::get);
+                .mapToObj(index -> fintCacheList.getCacheObjects().get(index));
     }
 
     public List<?> getSourceListSince(long timestamp) {
@@ -131,16 +105,16 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
     private void updateMetaData() {
         Map<Integer, Index> newIndex = new HashMap<>();
         NavigableMap<Long, BitSet> newLastUpdatedIndex = new TreeMap<>();
-        cacheMetaData.setCacheCount(cacheObjects.size());
+        cacheMetaData.setCacheCount(fintCacheList.getCacheObjects().size());
         cacheMetaData.setLastUpdated(System.currentTimeMillis());
-        ListIterator<? extends CacheObjectType<T>> iterator = cacheObjects.listIterator();
+        ListIterator<? extends CacheObjectType<T>> iterator = fintCacheList.getCacheObjects().listIterator();
         while (iterator.hasNext()) {
             int i = iterator.nextIndex();
             CacheObjectType<T> it = iterator.next();
             IntStream.of(it.getHashCodes()).forEach(key -> newIndex.compute(key, createIndex(i)));
             newLastUpdatedIndex.computeIfAbsent(it.getLastUpdated(), k -> new BitSet()).set(i);
         }
-        cacheMetaData.setSize(cacheObjects.parallelStream().mapToLong(CacheObjectType::getSize).sum());
+        cacheMetaData.setSize(fintCacheList.getCacheObjects().parallelStream().mapToLong(CacheObjectType::getSize).sum());
         index = newIndex;
         lastUpdatedIndex = newLastUpdatedIndex;
     }
@@ -179,7 +153,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
 
     @Override
     public Stream<? extends CacheObjectType<T>> filter(Predicate<T> predicate) {
-        return cacheObjects.stream().filter(o -> predicate.test(o.getObject()));
+        return fintCacheList.getCacheObjects().stream().filter(o -> predicate.test(o.getObject()));
     }
 
     @Override
@@ -189,7 +163,7 @@ public class FintCache<T extends Serializable> implements Cache<T>, Serializable
         }
         return index.get(hashCode)
                 .stream()
-                .mapToObj(cacheObjects::get)
+                .mapToObj(index -> fintCacheList.getCacheObjects().get(index))
                 .filter(o -> predicate.test(o.getObject()));
     }
 }

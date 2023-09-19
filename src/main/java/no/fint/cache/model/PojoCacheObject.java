@@ -8,7 +8,6 @@ import org.apache.commons.codec.binary.Hex;
 import java.io.Serializable;
 
 @Getter
-@EqualsAndHashCode(of = "checksum")
 @ToString
 public class PojoCacheObject<T extends Serializable> implements CacheObjectType<T> {
 

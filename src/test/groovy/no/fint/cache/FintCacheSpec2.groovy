@@ -49,7 +49,7 @@ class FintCacheSpec2 extends Specification {
         cache.size() == 2
     }
 
-    @Ignore("Denne feiler. Burde ikke oppdatere lastUpdated om de ikke er noen endring")
+    @Ignore("last-updated blir oppdatert, men ikke på elementene. Spør man etter updated-since får man ingen nye objekter, det genereres derfor ingen unødvendig datatrafikk")
     def "Don't update if the element is unchanged"() {
         given:
         def testObject = new TestObject("Frodo Lommelun");
@@ -66,7 +66,7 @@ class FintCacheSpec2 extends Specification {
         firstChange == lastChange
     }
 
-    @Ignore("Core1-cache bevarer ikke naturlig orden, men sorterer på checksum")
+    @Ignore("Core1-cache bevarer ikke naturlig orden. Funksjonsendret i core2. Ikke behov for å endres. ")
     def "Preserve insertion-order"() {
         when:
         cache.add([new TestObject("Samvis Gamgod")])
@@ -84,7 +84,6 @@ class FintCacheSpec2 extends Specification {
         values.get(4).name == "Gollum";
     }
 
-    @Ignore("Usikker på hvorfor. Bør rettes")
     def "Filter element by hashCode"() {
         given:
         def hashCode = 123456789
@@ -93,7 +92,7 @@ class FintCacheSpec2 extends Specification {
         cache.addCache([new CacheObject<>(new TestObject("Tom Bombadil"))])
 
         when:
-        def result = cache.filter(hashCode, () -> true).map(l -> l.getObject()).collect(Collectors.toList())
+        def result = cache.filter(hashCode, (TestObject o) -> true).map(l -> l.getObject()).collect(Collectors.toList())
 
         then:
         result.size() == 1

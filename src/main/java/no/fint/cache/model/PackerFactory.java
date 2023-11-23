@@ -5,9 +5,9 @@ import java.util.zip.InflaterInputStream;
 
 public final class PackerFactory {
     private PackerFactory() {
-        
+
     }
-    
+
     public static Packer create(String type) {
         switch (type.toUpperCase()) {
             case "DEFLATE":

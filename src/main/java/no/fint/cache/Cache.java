@@ -1,6 +1,7 @@
 package no.fint.cache;
 
 import no.fint.cache.model.CacheObject;
+import no.fint.cache.model.CacheObjectType;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,9 +19,9 @@ public interface Cache<T extends Serializable> {
 
     void flush();
 
-    Stream<CacheObject<T>> stream();
+    Stream<? extends CacheObjectType<T>> stream();
 
-    Stream<CacheObject<T>> streamSince(long timestamp);
+    Stream<? extends CacheObjectType<T>> streamSince(long timestamp);
 
     long getLastUpdated();
 
@@ -28,7 +29,7 @@ public interface Cache<T extends Serializable> {
 
     long volume();
 
-    Stream<CacheObject<T>> filter(Predicate<T> predicate);
+    Stream<? extends CacheObjectType<T>> filter(Predicate<T> predicate);
 
-    Stream<CacheObject<T>> filter(int hashCode, Predicate<T> predicate);
+    Stream<? extends CacheObjectType<T>> filter(int hashCode, Predicate<T> predicate);
 }

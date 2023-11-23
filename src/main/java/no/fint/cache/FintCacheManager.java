@@ -1,16 +1,12 @@
 package no.fint.cache;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-@Slf4j
 public class FintCacheManager<T extends Serializable> implements CacheManager<T> {
-
     private final ConcurrentMap<String, FintCache<T>> caches = new ConcurrentSkipListMap<>();
 
     @Override

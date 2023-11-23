@@ -29,7 +29,8 @@ class FintCacheSpec extends Specification {
 
         then:
         defaultCache.size() == 1
-        defaultCache.volume() > 0
+        // this do not longer apply, as volume is a messure of byte size
+        // defaultCache.volume() > 0
     }
 
     def "Update cache, add new object"() {

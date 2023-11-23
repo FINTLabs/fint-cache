@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @EqualsAndHashCode(of = "checksum")
 @ToString
-public final class CacheObject<T extends Serializable> implements Serializable {
+public final class CacheObject<T extends Serializable> implements CacheObjectType<T> {
     public static Packer PACKER = new SerializationPacker();
 
     private final byte[] checksum;
@@ -21,6 +21,7 @@ public final class CacheObject<T extends Serializable> implements Serializable {
     private final int[] hashCodes;
     private final int size;
 
+    @Override
     public T getObject() {
         return (T) PACKER.unpack(bytes);
     }
@@ -37,8 +38,12 @@ public final class CacheObject<T extends Serializable> implements Serializable {
         size = bytes.length;
     }
 
+    @Override
     public String getChecksum() {
         return Hex.encodeHexString(checksum);
     }
 
+    public byte[] getChecksumRaw() {
+        return checksum;
+    }
 }

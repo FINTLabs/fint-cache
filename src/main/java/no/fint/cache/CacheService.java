@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.cache.exceptions.CacheNotFoundException;
 import no.fint.cache.model.CacheObject;
+import no.fint.cache.model.CacheObjectType;
 import no.fint.cache.utils.CacheUri;
 import no.fint.event.model.Event;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public Stream<T> streamAll(String orgId) {
-        return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).stream().map(CacheObject::getObject);
+        return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).stream().map(CacheObjectType::getObject);
     }
 
     public Stream<T> streamSlice(String orgId, int skip, int limit) {
@@ -91,7 +92,7 @@ public abstract class CacheService<T extends Serializable> {
                 .stream()
                 .skip(skip)
                 .limit(limit)
-                .map(CacheObject::getObject);
+                .map(CacheObjectType::getObject);
     }
 
     public List<T> getAll(String orgId, long sinceTimestamp) {
@@ -99,7 +100,7 @@ public abstract class CacheService<T extends Serializable> {
     }
 
     public Stream<T> streamSince(String orgId, long sinceTimestamp) {
-        return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).streamSince(sinceTimestamp).map(CacheObject::getObject);
+        return getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId)).streamSince(sinceTimestamp).map(CacheObjectType::getObject);
     }
 
     public Stream<T> streamSliceSince(String orgId, long sinceTimestamp, int skip, int limit) {
@@ -108,17 +109,17 @@ public abstract class CacheService<T extends Serializable> {
                 .streamSince(sinceTimestamp)
                 .skip(skip)
                 .limit(limit)
-                .map(CacheObject::getObject);
+                .map(CacheObjectType::getObject);
     }
 
     public Optional<T> getOne(String orgId, Predicate<T> idFunction) {
         Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
-        return cache.filter(idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
+        return cache.filter(idFunction).max(Comparator.comparingLong(CacheObjectType::getLastUpdated)).map(CacheObjectType::getObject);
     }
 
     public Optional<T> getOne(String orgId, int hashCode, Predicate<T> idFunction) {
         Cache<T> cache = getCache(orgId).orElseThrow(() -> new CacheNotFoundException(orgId));
-        return cache.filter(hashCode, idFunction).max(Comparator.comparingLong(CacheObject::getLastUpdated)).map(CacheObject::getObject);
+        return cache.filter(hashCode, idFunction).max(Comparator.comparingLong(CacheObjectType::getLastUpdated)).map(CacheObjectType::getObject);
     }
 
     public void update(String orgId, List<T> objects) {
